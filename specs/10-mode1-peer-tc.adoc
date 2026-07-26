@@ -1,0 +1,67 @@
+= Specification 10 — Mode 1: Peer-to-peer threshold cryptography
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Definition
+
+N nodes on the internet do threshold cryptography directly with each
+other. No PKI required, no hierarchy, no certificates (beyond mutual
+TLS or Noise for transport auth).
+
+== When to use Mode 1
+
+Use Mode 1 when:
+
+* All participating nodes are known to each other (or discoverable via
+  gossip)
+* No hierarchical authority is needed
+* Output is a single signature, decryption, or computation
+* Latency matters more than institutional accountability
+
+== Architecture
+
+image::../images/three-mode-architecture.svg[Three-mode architecture]
+
+Mode 1 uses the foundational primitives only:
+
+* `confium-tc` (session, coordinator, reshare, kem)
+* `confium-tc-{frost-ed25519, frost-p256, cmp20, gg18, elgamal-p256, ecies-p256}`
+* `confium-net-{tcp, quic, ws}` transport
+* `confium-store` for share persistence
+
+== Peer authentication
+
+Each peer has an identity keypair (typically Ed25519 or ECDSA P-256).
+Peers authenticate each other via:
+
+* Mutual TLS (recommended for TCP/QUIC)
+* Noise Protocol (for ad-hoc connections)
+* Pre-shared long-term public keys (most secure)
+
+== Session lifecycle
+
+1. **Session create**: any peer initiates with message + quorum ID
+2. **Round 1**: each participating peer broadcasts commitments
+3. **Round 2 (or more)**: each peer sends shares
+4. **Aggregation**: any peer (or designated aggregator) combines outputs
+5. **Output**: final signature / decryption / computation result
+
+== Trust model
+
+* Threshold property: T-1 peers cannot produce output
+* Identifiable abort: misbehaving peers are detected via signed proofs
+* No central coordinator required (any peer can aggregate)
+
+== Performance characteristics
+
+* Round-trips: 2-3 for FROST, 3-4 for CMP20/GG18
+* Per-round message size: ~100 bytes per peer
+* Wall time on localhost: <50ms for 3-of-5 FROST-Ed25519
+* Wall time over WAN: dominated by network latency (~100ms per round)
+
+== Implementation source
+
+* Crate: `confium-tc` and per-algorithm crates
+* Example: `confium-examples/src/bin/p256_threshold_signing.rs`
+* Engineering doc: `TODO.roadmap/04-threshold-cryptography.md`
