@@ -1,0 +1,149 @@
+# Build and deploy the Confium multi-spec repository to GitHub Pages.
+#
+# Renders all AsciiDoc sources to standalone HTML using Asciidoctor,
+# then deploys via the official Pages actions. No Jekyll dependency —
+# Asciidoctor runs in the workflow, producing static HTML.
+#
+# Result: https://confium.github.io/specs/ (or custom domain if configured)
+#
+# Setup required (one-time, after first merge to main):
+# 1. Settings → Pages → Source: "GitHub Actions"
+# 2. Workflow permission: must allow `id-token: write` (already declared below)
+
+name: Deploy specs to Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "README.adoc"
+      - "specs/**"
+      - "report.adoc"
+      - "images/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  RUBY_VERSION: "3.3"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+
+      - name: Install Asciidoctor
+        run: |
+          gem install asciidoctor -v 2.0.23 --no-document
+          asciidoctor --version
+
+      - name: Build site
+        run: |
+          set -e
+          mkdir -p _site/specs _site/images
+
+          # Render README as index page
+          asciidoctor \
+            --attribute source-highlighter=rouge \
+            --attribute toc=left \
+            --attribute sectnums \
+            --attribute include-depth=3 \
+            -o _site/index.html \
+            README.adoc
+
+          # Render each spec
+          for f in specs/*.adoc; do
+            [ -e "$f" ] || continue
+            name=$(basename "$f" .adoc)
+            echo "Rendering specs/$name.adoc"
+            asciidoctor \
+              --attribute source-highlighter=rouge \
+              --attribute toc=left \
+              --attribute sectnums \
+              -o "_site/specs/$name.html" \
+              "$f"
+          done
+
+          # Preserve 2022 historical report
+          if [ -f report.adoc ]; then
+            asciidoctor \
+              --attribute source-highlighter=rouge \
+              --attribute toc=left \
+              -o _site/report-2022.html \
+              report.adoc
+          fi
+
+          # Copy images (referenced from both README and specs)
+          cp -r images/* _site/images/ 2>/dev/null || true
+
+          # Generate specs index page (lists all rendered specs)
+          cat > _site/specs/index.html <<'HTMLEOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Confium specifications</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; max-width: 800px; margin: 2em auto; padding: 0 1em; color: #24292e; }
+              h1 { border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+              li { margin: 0.5em 0; }
+              a { color: #0366d6; text-decoration: none; }
+              a:hover { text-decoration: underline; }
+              .meta { color: #586069; font-size: 0.9em; margin-top: 2em; }
+            </style>
+          </head>
+          <body>
+            <h1>Confium specifications</h1>
+            <p>Multi-spec technical repository for the Confium framework.</p>
+            <ul>
+          HTMLEOF
+          for f in specs/*.adoc; do
+            [ -e "$f" ] || continue
+            name=$(basename "$f" .adoc)
+            # Extract title from second line (= Title)
+            title=$(awk '/^= /{sub(/^= /,""); print; exit}' "$f")
+            [ -z "$title" ] && title="$name"
+            echo "              <li><a href=\"$name.html\">$title</a></li>" >> _site/specs/index.html
+          done
+          cat >> _site/specs/index.html <<'HTMLEOF'
+            </ul>
+            <div class="meta">
+              <p><a href="../index.html">← Back to overview</a></p>
+              <p><a href="https://github.com/confium/specs">Source on GitHub</a></p>
+            </div>
+          </body>
+          </html>
+          HTMLEOF
+
+          ls -la _site _site/specs
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
