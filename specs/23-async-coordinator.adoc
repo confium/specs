@@ -1,0 +1,61 @@
+= Specification 23 — Async session coordinator
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Purpose
+
+The coordinator enables globally distributed threshold signers to
+participate when convenient — no simultaneity required.
+
+== Trust model
+
+The coordinator is honest-but-curious:
+
+* **Sees** commitments and shares (cannot reconstruct secret — threshold property)
+* **Cannot forge** commitments (director identity-key signatures)
+* **Cannot corrupt** aggregation (verifiable)
+* **Can DoS** specific sessions (withhold aggregation)
+
+For high-stakes deployments, multiple coordinators run in parallel;
+signers submit to all; aggregation requires any to succeed.
+
+== Architecture
+
+image::../images/async-session-lifecycle.svg[Async lifecycle]
+
+The coordinator service:
+
+* Accepts commitments and shares from signers
+* Buffers them until threshold is met
+* Broadcasts aggregated state when ready
+* Aggregates final signature when T shares received
+* Audit-logs every step
+
+== Unlock window
+
+The passphrase unlock persists for a configurable window (default 4 hours).
+
+* **Shorter** (e.g., 30 min): more secure — compromised laptop has less time
+* **Longer** (e.g., 24 hours): more convenient — director completes both rounds
+
+Per-quorum policy. BIML defaults to 4 hours; IAs may use longer.
+
+== Annual ceremony
+
+The annual ceremony is sacred: in-person, network-isolated,
+ambassador-credential-verified. Operations performed:
+
+* Root DKG (initial keypair generation, one-time)
+* Root renewal (new keypair, cross-signed with old, every N years)
+* Director rotation (sync re-sharing, in-person verification)
+* Quorum policy changes (e.g., changing T from 5-of-7 to 6-of-9)
+* Audit review
+
+Everything else runs async via the coordinator.
+
+== Implementation source
+
+* Crate: `confium-tc` (coordinator submodule)
+* Engineering doc: `TODO.roadmap/29-tc-coordinator-design.md`
+* FFI: `cfmc_session_create`, `cfmc_session_submit_commitment`, `cfmc_session_submit_share`, `cfmc_session_aggregate`

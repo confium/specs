@@ -1,0 +1,63 @@
+= Specification 80 — OIML CNML flagship deployment
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Why CNML is the flagship
+
+The OIML Certificat Numérique de Métrologie Légale (CNML) project is
+the Mode 3 flagship because it demonstrates Confium at the highest-stakes
+end of the spectrum:
+
+* International treaty organization (OIML, 60+ member states)
+* Nation-state adversary (both cyber and political)
+* Decades-long archival (instruments last 10-20 years)
+* Sovereignty sensitivity (no single nation trusted)
+* Globally distributed directors (async signing required)
+* Annual ceremony cadence (root operations only)
+
+== Five-tier hierarchy
+
+image::../images/cnml-tier-hierarchy.svg[CNML tier hierarchy]
+
+|===
+|Tier |Signing |Encryption |Threshold |Ceremony
+|BIML |FROST-Ed25519 + ML-DSA-65 composite |ML-KEM-768 threshold |5-of-7 directors |Annual sync + emergency async
+|IA |FROST-P256 |ElGamal-P256 threshold |2-of-3 officers |Async
+|TL |ECDSA-P256 single-party |ECIES-P256 single-party |1-of-1 |Async
+|Mfr-Model |ECDSA-P256 single-party |ECIES-P256 single-party |1-of-1 |Async
+|Mfr-Instance |ECDSA-P256 single-party |n/a |1-of-1 |Async
+|===
+
+== Delegated signing at manufacturer tier
+
+The IA's Manufacturer Model Certificate is a scoped delegation:
+manufacturer can issue instance certs for instruments of a specific
+model only.
+
+== Async signing workflow
+
+image::../images/async-session-lifecycle.svg[Async lifecycle]
+
+1. Director enters passphrase → YubiKey decrypts wrapping key → share unwrapped
+2. App generates Round 1 commitment (FROST nonce)
+3. Commitment signed by YubiKey identity key
+4. Commitment uploaded to coordinator
+5. Director walks away (session stays unlocked ~4 hours)
+6. Coordinator broadcasts aggregated commitments when T received
+7. App generates Round 2 share
+8. Share signed by YubiKey, uploaded
+9. Coordinator aggregates T shares → signature
+10. Full transcript audit-logged
+
+== Partnerships
+
+* **Ribose**: operates OIML SMART, owns CNML, owns Confium
+* **BIML**: OIML secretariat, institutional partner
+* **NIST**: MPTS evaluation partner
+
+== Implementation source
+
+* Engineering doc: `TODO.roadmap/27-cnml-deployment.md`
+* Example: `confium-examples/src/bin/mini_cnml_demo.rs`
+* Cross-reference: link:12-mode3-certificate-pki.adoc[12 — Mode 3]

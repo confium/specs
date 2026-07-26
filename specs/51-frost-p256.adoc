@@ -1,0 +1,64 @@
+= Specification 51 — FROST threshold signature over ECDSA P-256
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Specification sources
+
+* FROST: draft-irtf-cfrg-frost-13
+* ECDSA: FIPS 186-5
+* Curve: NIST P-256 (SECG SEC 2)
+
+== What Confium provides
+
+`confium-tc-frost-p256` provides real cryptographic primitives:
+
+* Real Shamir secret sharing over P-256 scalar field
+* Real Lagrange interpolation at x=0
+* Real P-256 ECDSA signing via `p256::ecdsa::SigningKey`
+* Real P-256 ECDSA verification via `p256::ecdsa::VerifyingKey`
+
+== Trusted dealer model (caveat)
+
+True threshold ECDSA signing (where the secret is never reconstructed)
+requires the Multiplicative-to-Additive (MtA) protocol used by
+`confium-tc-cmp20` and `confium-tc-gg18`.
+
+This crate provides:
+
+* Real Shamir (split any scalar into N shares, recover from any T)
+* Real ECDSA (sign and verify under standard `p256` crate)
+* Reconstruct-then-sign (for testing, integration, demonstration)
+
+For production threshold ECDSA where the secret is never reconstructed,
+use `confium-tc-cmp20`.
+
+== Algorithm details
+
+Shamir split:
+
+```
+Random polynomial f(x) = secret + a_1·x + a_2·x² + ... + a_{t-1}·x^{t-1}
+Share i: (i, f(i)) for i in 1..=n
+```
+
+Lagrange recovery:
+
+```
+secret = f(0) = Σ y_i · Π_{j≠i} (0 - x_j) / (x_i - x_j)
+```
+
+All arithmetic in P-256 scalar field (modular, prime order ~2^256).
+
+== Test coverage
+
+* All C(5,3) = 10 share subsets recover same secret
+* Different threshold configurations (1-of-1, 2-of-3, 3-of-5, 5-of-7)
+* Real ECDSA round-trip: sign with `SigningKey`, verify with `VerifyingKey`
+* Integration tests: `crates/confium-tc-frost-p256/tests/integration.rs`
+
+== Implementation source
+
+* Crate: `confium-tc-frost-p256`
+* Example: `confium-examples/src/bin/p256_threshold_signing.rs`
+* Engineering doc: `TODO.roadmap/04-threshold-cryptography.md`

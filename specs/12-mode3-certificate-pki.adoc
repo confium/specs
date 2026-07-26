@@ -1,0 +1,69 @@
+= Specification 12 — Mode 3: TC Certificate PKI
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Definition
+
+Organizations with their own certificate/document formats and workflow
+semantics. Custom delegation rules, custom verification pipelines,
+custom archival rules.
+
+== CNML flagship deployment
+
+image::../images/cnml-tier-hierarchy.svg[CNML 5-tier hierarchy]
+
+The OIML CNML project is the Mode 3 flagship. It demonstrates Confium
+at the highest-stakes end:
+
+* International treaty organization (OIML, 60+ member states)
+* Nation-state adversary (both cyber and political)
+* Decades-long archival
+* Sovereignty sensitivity (no single nation trusted)
+* Globally distributed directors (async signing required)
+* Annual ceremony cadence
+
+== Five-tier hierarchy
+
+```
+BIML Root (5-of-7, annual ceremony)
+  └─→ IA Cert (2-of-3, async)
+        ├─→ TL Cert (single-party)
+        └─→ Manufacturer Model Cert (scoped delegation)
+              └─→ Instance Cert (single-party, manufacturer-issued)
+```
+
+Each tier has its own threshold structure. See link:80-cnml-deployment.adoc[80 — CNML deployment]
+for the full specification.
+
+== Components specific to Mode 3
+
+|===
+|Component |Purpose
+|`confium-pki` (cert + delegation + cms + xmldsig) |X.509, scoped delegation, CMS, XML signatures
+|`confium-deployment` |Deployment manifest + actor identity
+|`confium-transparency` |Merkle tree + OTS + ERS (transparency + long-term archival)
+|`confium-attributes` |Attribute-based threshold party selection
+|`confium-patterns` |Escrow + revocation (Thunderbird-inspired)
+|===
+
+== Deployment manifest
+
+Mode 3 deployments are described by a TOML manifest encoding:
+
+* Tier structure (number, names, roles)
+* Quorum T/N per tier
+* Attribute predicates (geography, expertise, COI)
+* Delegation rules (depth, scope)
+* Async signing policy
+* Transparency log policy
+* Archival / re-quorum cadence
+
+See link:40-deployment-manifest.adoc[40 — Deployment manifest] for the
+schema.
+
+== Implementation source
+
+* Crates: `confium-pki`, `confium-deployment`, `confium-transparency`, `confium-attributes`, `confium-patterns`
+* Example: `confium-examples/src/bin/mini_cnml_demo.rs`
+* Engineering docs: `TODO.roadmap/27-cnml-deployment.md`, `TODO.roadmap/33-config-manifest.md`

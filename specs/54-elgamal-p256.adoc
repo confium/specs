@@ -1,0 +1,46 @@
+= Specification 54 — Threshold ElGamal over P-256
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Overview
+
+Threshold ElGamal encryption over P-256. Real cryptographic operations
+using P-256 group arithmetic.
+
+== Encapsulate (encryptor side, anyone)
+
+```
+Generate ephemeral scalar r
+c1 = r · G                    (ephemeral public key)
+c2 = r · recipient_pubkey     (shared secret point)
+shared_secret = X(c2)         (X-coordinate, 32 bytes)
+```
+
+## Partial decryption (each party)
+
+```
+partial_i = share_i · c1
+```
+
+## Aggregate (T-of-N partials via Lagrange)
+
+```
+combined = Σ λ_i · partial_i = secret · c1 = r · recipient_pubkey
+shared_secret = X(combined)
+```
+
+The encryptor and decryptor derive the same shared secret because
+`r · P = r · x · G = x · r · G = x · c1`.
+
+== Use cases
+
+* Confidential test report archival (5-10 year appeals window)
+* Sealed revocation evidence (decryptable only via court order)
+* Cross-tier escalation (IA encrypts to BIML)
+* Browser-side key escrow
+
+== Implementation source
+
+* Crate: `confium-tc-elgamal-p256`
+* Engineering doc: `TODO.roadmap/31-threshold-encryption.md`
