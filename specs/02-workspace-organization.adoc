@@ -1,0 +1,179 @@
+= Specification 02 — Workspace organization
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Overview
+
+The `confium/` Rust workspace contains 43 crates organized by concern.
+This document describes the layout and the rationale for each crate
+boundary.
+
+== Crate categories
+
+=== Core / engine (5 crates)
+
+|===
+|Crate |Purpose |Status
+|`confium-core` |Engine: plugin loader, registry, FFI entry points |Shipped (10 interfaces)
+|`confium-api` |Public Rust API + plugin SDK |Skeleton
+|`confium-macros` |Proc-macros for plugin authors |Skeleton
+|`confium-cli` |`confium` end-user command |Sub-command stubs wired
+|`confium-mock-plugin` |Reference mock plugin for testing |Skeleton
+|===
+
+=== Threshold cryptography infrastructure (1 consolidated crate)
+
+|===
+|Crate |Submodules |Status
+|`confium-tc` |`session`, `coordinator`, `reshare`, `kem` |Real (74 tests)
+|===
+
+=== Threshold signing algorithms (6 crates)
+
+|===
+|Crate |Algorithm |Status
+|`confium-tc-frost-ed25519` |FROST over Ed25519 |Shipped (real)
+|`confium-tc-frost-p256` |FROST over ECDSA P-256 |Real (25 tests)
+|`confium-tc-cmp20` |CMP20 over ECDSA P-256 |Shipped (real)
+|`confium-tc-gg18` |GG18 over ECDSA P-256 |Shipped (real)
+|`confium-tc-bls` |Threshold BLS |Interface
+|`confium-tc-frost-ml-dsa-65` |Threshold ML-DSA-65 |Research
+|===
+
+=== Threshold encryption algorithms (4 crates)
+
+|===
+|Crate |Algorithm |Status
+|`confium-tc-elgamal-p256` |Threshold ElGamal over P-256 |Real (3 tests)
+|`confium-tc-ecies-p256` |Threshold ECIES with ECDH + AES-256-GCM |Real (4 tests)
+|`confium-tc-ml-kem` |Threshold ML-KEM (FIPS 203) |Research
+|`confium-tc-fhe-bfv` |Threshold BFV FHE |Research
+|===
+
+=== PKI (1 consolidated crate)
+
+|===
+|Crate |Submodules |Status
+|`confium-pki` |`cert`, `csr`, `path`, `result`, `delegation`, `cms`, `xmldsig` |Real (43 tests, feature-flagged)
+|===
+
+=== Storage backends (5 crates)
+
+|===
+|Crate |Standard |Status
+|`confium-store` |Store trait + in-memory backend |Shipped
+|`confium-store-pkcs11` |PKCS#11 v3.0 |Skeleton
+|`confium-store-tpm` |TPM 2.0 |Skeleton
+|`confium-store-cloud` |AWS/GCP/Azure KMS REST |Skeleton
+|`confium-store-openpgp-card` |OpenPGP card |Interface
+|===
+
+=== Network transports (4 crates)
+
+|===
+|Crate |Transport |Status
+|`confium-net` |Transport trait |Shipped
+|`confium-net-tcp` |TCP |Shipped
+|`confium-net-quic` |QUIC |Shipped
+|`confium-net-ws` |WebSocket |Shipped
+|===
+
+=== Mode 2 shims (4 crates)
+
+|===
+|Crate |Host |Status
+|`confium-pkcs11-server` |PKCS#11 v3.0 host apps |Dispatch layer
+|`confium-openssl-provider` |OpenSSL 3.0 host apps |Interface
+|`confium-tls-signer` |TLS 1.3 host apps |Interface
+|`confium-jce-provider` |Java host apps |Interface
+|===
+
+=== Mode 3 infrastructure (5 crates)
+
+|===
+|Crate |Purpose |Status
+|`confium-deployment` |Deployment manifest + actor identity (consolidated) |Real (14 tests)
+|`confium-transparency` |Merkle tree + OTS + ERS (consolidated) |Real (19 tests)
+|`confium-attributes` |Attribute-based threshold predicates |Real (9 tests)
+|`confium-composite` |Multi-alg composite signatures (PQ migration) |Real (7 tests with Ed25519 verifier)
+|`confium-patterns` |Escrow + revocation service (consolidated) |Real (7 tests)
+|===
+
+=== Sandbox (2 crates)
+
+|===
+|Crate |Runtime |Status
+|`confium-sandbox-wasm` |WASM (browser director signing) |Shipped
+|`confium-sandbox-process` |Out-of-process |Shipped
+|===
+
+=== Other (7 crates)
+
+|===
+|Crate |Purpose
+|`confium-daemon` |JSON-RPC daemon
+|`confium-examples` |Runnable demo binaries
+|`confium-registry` |Static-site plugin catalog client
+|`confium-publish` |Plugin author tool
+|`confium-test-harness` |NIST MPTS evaluation bench
+|`confium-ring` |Threshold ring signatures (research)
+|===
+
+== Workspace Cargo.toml structure
+
+[source,toml]
+----
+[workspace.package]
+version = "0.3.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Ribose Open <open.source@ribose.com>"]
+license = "BSD-2-Clause"
+homepage = "https://www.confium.org/"
+repository = "https://github.com/confium/confium"
+categories = ["authentication", "cryptography"]
+
+[workspace.dependencies]
+# Internal crates
+confium-pki = { path = "crates/confium-pki", version = "0.3.0" }
+# ... etc
+
+# Shared external deps
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
+p256 = { version = "0.13", features = ["ecdsa", "arithmetic"] }
+# ... etc
+----
+
+== Consolidation rationale
+
+The workspace was originally 53 crates (PR #33). Five logical merge
+groups consolidated it to 43 (PR #42):
+
+|===
+|Merged into |From |Why
+|`confium-patterns` |escrow + revocation-service |Both Thunderbird-inspired patterns sharing Encapsulator trait
+|`confium-deployment` |config + identity |Manifest defines identity structure
+|`confium-transparency` |transparency + ots + ers |All about artifact provenance
+|`confium-pki` |cert + cert-delegation + cms + xmldsig |All PKI envelope work sharing VerificationResult
+|`confium-tc` |tc + tc-coordinator + tc-reshare + tc-kem |Tightly coupled TC session lifecycle
+|===
+
+What stays separate: per-algorithm crates (different crypto deps),
+per-storage-backend crates (different hardware/cloud SDKs),
+per-network-transport crates (different async runtime deps), Mode 2
+shims (separate cdylib/jar for separate host apps).
+
+== Anti-goals
+
+* **Not** fragmenting so small that crate count explodes (we tried 53,
+  rolled back to 43)
+* **Not** consolidating so much that consumers pay for features they
+  don't use (per-algorithm crates stay separate)
+
+== Cross-references
+
+* link:00-framework-overview.adoc[00 — Framework overview]
+* Implementation: `confium/Cargo.toml`
+* Engineering: `TODO.roadmap/26-confium-framework.md`

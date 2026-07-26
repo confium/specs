@@ -1,0 +1,178 @@
+= Specification 01 — Three deployment modes
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Overview
+
+Confium supports three layered deployment modes. Each mode is a strict
+superset of the previous mode's capabilities. Consumers use the
+appropriate mode for their use case.
+
+== Mode 1 — Peer-to-peer threshold cryptography
+
+=== Definition
+
+N nodes on the internet do threshold cryptography directly. No PKI, no
+hierarchy, no certificates (beyond mutual TLS or Noise for transport
+auth). They run a session, exchange messages, produce output.
+
+=== Audience
+
+Cryptography engineers, distributed systems engineers, blockchain
+developers, MPC application builders, applied researchers.
+
+=== Examples
+
+* Distributed key custody (cryptocurrency wallets, KMS clusters)
+* BFT consensus signature production (validators, distributed ledgers)
+* Multi-party computation with secret-output revelation
+* Sealed-bid auctions (encrypted bids, threshold-open at close)
+* Privacy-preserving analytics (threshold-decrypt aggregate results)
+* Distributed build/signing pipelines (multiple build agents collaborate)
+* Threshold SSH jump hosts (bastion cluster signs session certs)
+* Distributed database encryption (TDEK held across regions)
+
+=== Architecture used
+
+* `confium-tc` — session primitives + coordinator + reshare + kem (consolidated)
+* `confium-net-{tcp,quic,ws}` — transport
+* One algorithm crate (`confium-tc-frost-ed25519`, `confium-tc-elgamal-p256`, etc.)
+* `confium-store` for share persistence
+* Mutual TLS or Noise Protocol for transport auth
+* Optional: `confium-tc-reshare` for committee evolution
+
+=== Time to value
+
+Hours. Drop crate, write ~50 lines, run session.
+
+== Mode 2 — TC PKI replacement
+
+=== Definition
+
+Existing PKI consumers (web servers, code signers, email signers, VPN
+gateways, database encryption, PKCS#11 applications) replace
+single-party keys with threshold keys **without changing their
+surrounding ecosystem**.
+
+Browsers still verify TLS normally; OpenSSH still works; OpenSSL still
+works. The PKCS#11 token they're talking to is actually a Confium
+threshold coordinator dispatching to a quorum behind the scenes.
+
+=== Audience
+
+Corporate security teams, CA operators, DevSecOps architects,
+HSM-using enterprises, government PKI operators.
+
+=== Examples
+
+* Web TLS for high-value sites (root CAs, payment gateways)
+* Code signing at scale (software vendors signing release artifacts)
+* Corporate S/MIME email signing
+* VPN gateway authentication
+* Database TDEK
+* DNSSEC zone signing
+* DKIM email signing
+* CA root key management
+* PKCS#11 drop-in for any existing PKCS#11 app
+
+=== Architecture used
+
+Everything from Mode 1, plus:
+
+* `confium-pki` (cert submodule) — X.509 cert + CSR types
+* **`confium-pkcs11-server`** — exposes PKCS#11 v3.0 API, dispatches
+  internally to threshold protocol. **The killer feature for Mode 2.**
+* **`confium-openssl-provider`** — OpenSSL 3.0 provider using Confium
+* `confium-tls-signer` — TLS 1.3 signature callback
+* `confium-jce-provider` — Java Cryptography Extension provider
+* HSM-backed share storage (PKCS#11, TPM)
+* Optional: `confium-composite` for PQ hybrid signatures
+* Optional: `confium-transparency` for high-value deployments
+
+=== Time to value
+
+Days to weeks. Deploy coordinator, configure HSM, integrate with
+existing PKI, test failover.
+
+=== PQC migration
+
+Mode 2 is the killer feature for PQ migration. Enterprises facing the
+2024-2030 PQ transition can either:
+
+* Replace all HSMs (years of vendor cooperation)
+* Re-do threshold protocols per algorithm
+* Re-issue all credentials
+
+OR:
+
+* Deploy Confium for PKCS#11 today
+* Software upgrade to composite signatures tomorrow
+* Software upgrade to PQ-only when ecosystem ready
+* PKCS#11 interface unchanged throughout
+
+== Mode 3 — TC Certificate PKI
+
+=== Definition
+
+Organizations with their own certificate/document formats and workflow
+semantics. Custom delegation rules, custom verification pipelines,
+custom archival rules.
+
+=== Audience
+
+Institutional system architects — government tech leads, treaty org
+CIOs, regulator CTOs, accreditation body directors.
+
+=== Examples
+
+* OIML CNML (flagship) — type approval certificates with model-bound
+  delegation, 5-tier hierarchy
+* BIPM calibration — SI-traceable calibration certificates
+* Pharmaceutical regulator — drug applications, GMP certs
+* Academic accreditation — diplomas with department/university/
+  accreditor tiers
+* Financial audit firms — audit attestations with engagement/
+  partner/firm tiers
+* Supply chain provenance — regulator/certifier/manufacturer/
+  shipper/customs
+* Standards bodies — ISO/IEC standards with working group/
+  committee/body tiers
+* Treaty organizations — international agreements with
+  multi-national signatories
+
+=== Architecture used
+
+Everything from Mode 2, plus:
+
+* `confium-pki` (delegation submodule) — scoped delegation templates
+* `confium-pki` (cms submodule) — CMS/PKCS#7 envelope
+* `confium-pki` (xmldsig submodule) — XMLDSig + Exclusive C14N
+* `confium-deployment` — deployment manifest with tier structure,
+  quorum T/N, attribute predicates, delegation rules, async policies,
+  transparency log policy
+* `confium-transparency` (transparency + ots + ers) — append-only
+  Merkle tree with OTS anchoring and Evidence Record Syntax for
+  long-term archival
+* `confium-attributes` — attribute-based threshold party selection
+* `confium-patterns` (escrow + revocation) — Thunderbird-inspired
+  patterns
+
+=== Time to value
+
+Months. Design manifest, integrate, test, deploy, train.
+
+== How the modes relate
+
+image::../images/three-mode-architecture.svg[Three-mode layered architecture]
+
+Layered. Mode 3 builds on Mode 2 builds on Mode 1. A deployment can
+use any mode or combination.
+
+== Cross-references
+
+* link:00-framework-overview.adoc[00 — Framework overview]
+* link:10-mode1-peer-tc.adoc[10 — Mode 1 detail]
+* link:11-mode2-pki-replacement.adoc[11 — Mode 2 detail]
+* link:12-mode3-certificate-pki.adoc[12 — Mode 3 detail]
+* Implementation: `TODO.roadmap/26-confium-framework.md`

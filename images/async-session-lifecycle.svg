@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580" font-family="Helvetica, Arial, sans-serif">
+  <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold">Async session coordinator lifecycle</text>
+  <text x="400" y="52" text-anchor="middle" font-size="12" fill="#555">Globally distributed directors participate when convenient — no simultaneity required</text>
+
+  <!-- Coordinator -->
+  <rect x="320" y="280" width="160" height="60" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="400" y="305" text-anchor="middle" font-size="13" font-weight="bold" fill="#0284c7">Coordinator</text>
+  <text x="400" y="323" text-anchor="middle" font-size="10">SQLite + audit log</text>
+
+  <!-- Director A -->
+  <rect x="60" y="80" width="140" height="60" rx="8" fill="#fef3e7" stroke="#d97706" stroke-width="2"/>
+  <text x="130" y="105" text-anchor="middle" font-size="12" font-weight="bold" fill="#d97706">Director A</text>
+  <text x="130" y="123" text-anchor="middle" font-size="10">Europe, 14:00 local</text>
+
+  <!-- Director B -->
+  <rect x="330" y="80" width="140" height="60" rx="8" fill="#fef3e7" stroke="#d97706" stroke-width="2"/>
+  <text x="400" y="105" text-anchor="middle" font-size="12" font-weight="bold" fill="#d97706">Director B</text>
+  <text x="400" y="123" text-anchor="middle" font-size="10">Americas, 09:00 local</text>
+
+  <!-- Director C -->
+  <rect x="600" y="80" width="140" height="60" rx="8" fill="#fef3e7" stroke="#d97706" stroke-width="2"/>
+  <text x="670" y="105" text-anchor="middle" font-size="12" font-weight="bold" fill="#d97706">Director C</text>
+  <text x="670" y="123" text-anchor="middle" font-size="10">Asia-Pacific, 23:00 local</text>
+
+  <!-- State machine -->
+  <g font-size="11">
+    <rect x="60" y="430" width="120" height="40" rx="4" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+    <text x="120" y="453" text-anchor="middle">Pending</text>
+
+    <line x1="180" y1="450" x2="220" y2="450" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="220" y="430" width="170" height="40" rx="4" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="305" y="453" text-anchor="middle">CommitmentsCollected</text>
+
+    <line x1="390" y1="450" x2="430" y2="450" stroke="#a16207" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="430" y="430" width="170" height="40" rx="4" fill="#fef9c3" stroke="#a16207" stroke-width="1.5"/>
+    <text x="515" y="453" text-anchor="middle">SharesCollected</text>
+
+    <line x1="600" y1="450" x2="640" y2="450" stroke="#a16207" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="640" y="430" width="120" height="40" rx="4" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+    <text x="700" y="453" text-anchor="middle">Completed</text>
+  </g>
+
+  <!-- Arrows -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Director → Coordinator arrows -->
+  <line x1="130" y1="140" x2="335" y2="275" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="400" y1="140" x2="400" y2="275" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="670" y1="140" x2="465" y2="275" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Coordinator → state machine -->
+  <line x1="400" y1="340" x2="400" y2="425" stroke="#999" stroke-width="1.5" stroke-dasharray="4"/>
+  <text x="410" y="385" font-size="10" fill="#666">state machine driven</text>
+  <text x="410" y="398" font-size="10" fill="#666">by T commitments</text>
+  <text x="410" y="411" font-size="10" fill="#666">+ T shares</text>
+
+  <!-- Unlock window -->
+  <rect x="60" y="510" width="700" height="40" rx="4" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+  <text x="410" y="528" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Unlock window (default 4 hours, configurable per quorum)</text>
+  <text x="410" y="543" text-anchor="middle" font-size="10" fill="#666">Director enters passphrase once; session stays unlocked within window; auto-expires after</text>
+
+  <text x="400" y="570" text-anchor="middle" font-size="10" fill="#888">TODO.roadmap/29-tc-coordinator-design.md</text>
+</svg>

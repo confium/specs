@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" font-family="Helvetica, Arial, sans-serif">
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="bold">Confium three-mode architecture</text>
+  <text x="450" y="52" text-anchor="middle" font-size="12" fill="#555">Layered: Mode 3 builds on Mode 2 builds on Mode 1</text>
+
+  <!-- Mode 3 -->
+  <rect x="50" y="80" width="800" height="180" rx="12" fill="#fef3e7" stroke="#d97706" stroke-width="2"/>
+  <text x="70" y="108" font-size="16" font-weight="bold" fill="#d97706">Mode 3 — TC Certificate PKI</text>
+  <text x="70" y="128" font-size="11" fill="#666">Institutional deployments with custom certificate formats and workflows</text>
+  <g font-size="11" fill="#333">
+    <text x="70" y="156">• OIML CNML (flagship)</text>
+    <text x="70" y="174">• BIPM calibration</text>
+    <text x="70" y="192">• Pharmaceutical regulators</text>
+    <text x="70" y="210">• Academic accreditation</text>
+    <text x="70" y="228">• Supply chain provenance</text>
+    <text x="70" y="246">• Treaty organizations</text>
+  </g>
+  <g font-size="10" fill="#666">
+    <text x="380" y="156">Adds:</text>
+    <text x="380" y="174">• confium-pki (cert + delegation + cms + xmldsig)</text>
+    <text x="380" y="192">• confium-deployment (manifest + identity)</text>
+    <text x="380" y="210">• confium-transparency (+ ots + ers)</text>
+    <text x="380" y="228">• confium-attributes (predicate-based signing)</text>
+    <text x="380" y="246">• confium-patterns (escrow + revocation)</text>
+  </g>
+
+  <!-- Mode 2 -->
+  <rect x="50" y="290" width="800" height="180" rx="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="70" y="318" font-size="16" font-weight="bold" fill="#0284c7">Mode 2 — TC PKI replacement (drop-in)</text>
+  <text x="70" y="338" font-size="11" fill="#666">Existing PKI consumers replace single-party keys with threshold — no app changes</text>
+  <g font-size="11" fill="#333">
+    <text x="70" y="366">• Web TLS (root CAs, payment gateways)</text>
+    <text x="70" y="384">• Code signing at scale</text>
+    <text x="70" y="402">• Corporate S/MIME</text>
+    <text x="70" y="420">• DNSSEC / DKIM zone signing</text>
+    <text x="70" y="438">• Database TDEK</text>
+    <text x="70" y="456">• PKCS#11 drop-in for any app</text>
+  </g>
+  <g font-size="10" fill="#666">
+    <text x="380" y="366">Adds:</text>
+    <text x="380" y="384">• confium-pkcs11-server (Mode 2 cornerstone)</text>
+    <text x="380" y="402">• confium-openssl-provider (3.0)</text>
+    <text x="380" y="420">• confium-tls-signer (TLS 1.3 callback)</text>
+    <text x="380" y="438">• confium-jce-provider (Java)</text>
+    <text x="380" y="456">• confium-composite (PQ migration)</text>
+  </g>
+
+  <!-- Mode 1 -->
+  <rect x="50" y="500" width="800" height="160" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="70" y="528" font-size="16" font-weight="bold" fill="#059669">Mode 1 — Peer-to-peer threshold cryptography</text>
+  <text x="70" y="548" font-size="11" fill="#666">N nodes do TC directly, no PKI required</text>
+  <g font-size="11" fill="#333">
+    <text x="70" y="576">• MPC and distributed custody</text>
+    <text x="70" y="594">• BFT consensus signing</text>
+    <text x="70" y="612">• Sealed-bid auctions</text>
+    <text x="70" y="630">• Distributed build signing</text>
+    <text x="70" y="648">• Threshold SSH jump hosts</text>
+  </g>
+  <g font-size="10" fill="#666">
+    <text x="380" y="576">Uses:</text>
+    <text x="380" y="594">• confium-tc (session, coordinator, reshare, kem)</text>
+    <text x="380" y="612">• confium-tc-{frost-ed25519, frost-p256,</text>
+    <text x="380" y="630">  cmp20, gg18, elgamal-p256, ecies-p256}</text>
+    <text x="380" y="648">• confium-net-{tcp,quic,ws}</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="450" y="700" text-anchor="middle" font-size="10" fill="#888">github.com/confium/confium — 43-crate Rust workspace, 744+ tests</text>
+</svg>
