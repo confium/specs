@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" font-family="Helvetica, Arial, sans-serif">
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="bold">OIML CNML 5-tier hierarchy</text>
+  <text x="450" y="52" text-anchor="middle" font-size="12" fill="#555">Mode 3 flagship: BIML → IA → {TL, Manufacturer-Model} → Manufacturer-Instance</text>
+
+  <!-- Tier 1: BIML -->
+  <rect x="300" y="80" width="300" height="80" rx="8" fill="#fef3e7" stroke="#d97706" stroke-width="2"/>
+  <text x="450" y="105" text-anchor="middle" font-size="14" font-weight="bold" fill="#d97706">BIML Root</text>
+  <text x="450" y="125" text-anchor="middle" font-size="11">OIML directors (5-of-7 threshold)</text>
+  <text x="450" y="143" text-anchor="middle" font-size="10" fill="#666">Annual ceremony; sync only</text>
+
+  <!-- Lines down from BIML to IA -->
+  <line x1="450" y1="160" x2="200" y2="200" stroke="#999" stroke-width="1.5"/>
+  <line x1="450" y1="160" x2="450" y2="200" stroke="#999" stroke-width="1.5"/>
+  <line x1="450" y1="160" x2="700" y2="200" stroke="#999" stroke-width="1.5"/>
+
+  <!-- Tier 2: IAs -->
+  <rect x="100" y="200" width="200" height="70" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="200" y="222" text-anchor="middle" font-size="12" font-weight="bold" fill="#0284c7">IA-France</text>
+  <text x="200" y="240" text-anchor="middle" font-size="10">2-of-3 officers, async</text>
+  <text x="200" y="256" text-anchor="middle" font-size="9" fill="#666">FROST-P256 + ElGamal-P256</text>
+
+  <rect x="350" y="200" width="200" height="70" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="450" y="222" text-anchor="middle" font-size="12" font-weight="bold" fill="#0284c7">IA-Germany (PTB)</text>
+  <text x="450" y="240" text-anchor="middle" font-size="10">2-of-3 officers, async</text>
+  <text x="450" y="256" text-anchor="middle" font-size="9" fill="#666">FROST-P256 + ElGamal-P256</text>
+
+  <rect x="600" y="200" width="200" height="70" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="700" y="222" text-anchor="middle" font-size="12" font-weight="bold" fill="#0284c7">IA-Japan (NMIJ)</text>
+  <text x="700" y="240" text-anchor="middle" font-size="10">2-of-3 officers, async</text>
+  <text x="700" y="256" text-anchor="middle" font-size="9" fill="#666">FROST-P256 + ElGamal-P256</text>
+
+  <!-- Lines from IA-France to TL + Mfr-Model -->
+  <line x1="200" y1="270" x2="120" y2="320" stroke="#999" stroke-width="1.5"/>
+  <line x1="200" y1="270" x2="280" y2="320" stroke="#999" stroke-width="1.5"/>
+
+  <!-- Tier 3: TL and Manufacturer-Model -->
+  <rect x="40" y="320" width="160" height="70" rx="8" fill="#f3e8ff" stroke="#7e22ce" stroke-width="2"/>
+  <text x="120" y="342" text-anchor="middle" font-size="11" font-weight="bold" fill="#7e22ce">Testing Lab</text>
+  <text x="120" y="360" text-anchor="middle" font-size="10">single-party</text>
+  <text x="120" y="375" text-anchor="middle" font-size="9" fill="#666">signs test reports</text>
+
+  <rect x="220" y="320" width="160" height="70" rx="8" fill="#fef9c3" stroke="#a16207" stroke-width="2"/>
+  <text x="300" y="342" text-anchor="middle" font-size="11" font-weight="bold" fill="#a16207">Mfr Model Cert</text>
+  <text x="300" y="360" text-anchor="middle" font-size="10">scoped delegation</text>
+  <text x="300" y="375" text-anchor="middle" font-size="9" fill="#666">model-bound</text>
+
+  <!-- TL test report flow -->
+  <line x1="120" y1="390" x2="120" y2="430" stroke="#999" stroke-width="1.5" stroke-dasharray="4"/>
+  <text x="120" y="421" text-anchor="middle" font-size="9" fill="#666">test report → encrypt to IA threshold KEM</text>
+
+  <!-- Manufacturer-Model signs Instances -->
+  <line x1="300" y1="390" x2="300" y2="450" stroke="#999" stroke-width="1.5"/>
+  <text x="300" y="425" text-anchor="middle" font-size="9" fill="#666">delegated authority</text>
+
+  <!-- Tier 4: Instances -->
+  <rect x="200" y="450" width="200" height="60" rx="8" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+  <text x="300" y="472" text-anchor="middle" font-size="11" font-weight="bold" fill="#15803d">Instance Certificate</text>
+  <text x="300" y="490" text-anchor="middle" font-size="10">individual instrument</text>
+  <text x="300" y="503" text-anchor="middle" font-size="9" fill="#666">physical or software instance</text>
+
+  <!-- Transparency log annotation -->
+  <rect x="500" y="450" width="320" height="80" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" stroke-dasharray="4"/>
+  <text x="660" y="472" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Public Transparency Log</text>
+  <text x="660" y="490" text-anchor="middle" font-size="10">append-only Merkle tree</text>
+  <text x="660" y="503" text-anchor="middle" font-size="10">Bitcoin OTS anchoring</text>
+  <text x="660" y="518" text-anchor="middle" font-size="9" fill="#666">verifier proves inclusion at any block N</text>
+
+  <line x1="400" y1="480" x2="500" y2="480" stroke="#999" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <text x="450" y="575" text-anchor="middle" font-size="10" fill="#888">TODO.roadmap/27-cnml-deployment.md — flagship Mode 3 deployment</text>
+</svg>

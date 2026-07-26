@@ -1,0 +1,145 @@
+= Confium multi-spec repository
+Ribose Inc. <open.source@ribose.com>
+:toc: macro
+:toclevels: 3
+:sectnums:
+:sectanchors:
+:source-highlighter: rouge
+
+This repository is the **authoritative technical specification** for the
+Confium open-source framework for multi-stakeholder threshold cryptography.
+
+It is organized as a collection of focused specification documents. Each
+spec covers one aspect of how Confium works, with conceptual overview,
+architectural diagrams (SVG), type definitions, wire formats, behavioral
+invariants, and references to implementation source.
+
+== Status
+
+This repository is being generalized from a single 2022 technical report
+into a multi-spec collection reflecting the current three-mode
+architecture. The original 2022 report is preserved at
+link:report.adoc[] for historical context.
+
+== Specification documents
+
+=== Architecture overview
+
+* link:specs/00-framework-overview.adoc[00 — Framework overview] — what Confium is, three-mode architecture
+* link:specs/01-three-modes.adoc[01 — Three deployment modes] — Mode 1 / Mode 2 / Mode 3 definitions
+* link:specs/02-workspace-organization.adoc[02 — Workspace organization] — 43-crate structure, dependencies
+
+=== Per-mode specifications
+
+* link:specs/10-mode1-peer-tc.adoc[10 — Mode 1: Peer-to-peer threshold cryptography]
+* link:specs/11-mode2-pki-replacement.adoc[11 — Mode 2: TC PKI replacement]
+* link:specs/12-mode3-certificate-pki.adoc[12 — Mode 3: TC Certificate PKI]
+
+=== Plugin and primitive contracts
+
+* link:specs/20-plugin-contract.adoc[20 — Plugin contract] — `cfmp_*` FFI surface
+* link:specs/21-interface-registry.adoc[21 — Interface registry] — OCP via `register_interface!`
+* link:specs/22-threshold-session.adoc[22 — Threshold session lifecycle] — DKG, sign, reshare, refresh
+* link:specs/23-async-coordinator.adoc[23 — Async session coordinator] — distributed-signer workflow
+* link:specs/24-share-reshare.adoc[24 — Share re-sharing] — committee evolution, public-key preservation
+* link:specs/25-threshold-encryption.adoc[25 — Threshold encryption] — KEM, AEAD, hybrid pattern
+
+=== PKI and envelope specifications
+
+* link:specs/30-cert-and-csr.adoc[30 — X.509 cert and CSR types]
+* link:specs/31-cert-delegation.adoc[31 — Scoped delegation templates]
+* link:specs/32-cms-signeddata.adoc[32 — CMS SignedData envelope (RFC 5652)]
+* link:specs/33-xmldsig-c14n.adoc[33 — XMLDSig + Canonical XML (RFC 3076)]
+* link:specs/34-composite-signatures.adoc[34 — Composite multi-alg signatures (PQ migration)]
+
+=== Operational specifications
+
+* link:specs/40-deployment-manifest.adoc[40 — Deployment manifest] — TOML schema for Mode 2/3
+* link:specs/41-identity-and-hardware.adoc[41 — Identity and hardware] — actor model, PKCS#11/TPM/OpenPGP card
+* link:specs/42-transparency-log.adoc[42 — Transparency log] — Merkle tree + RFC 6962 inclusion proofs
+* link:specs/43-opentimestamps.adoc[43 — OpenTimestamps anchoring]
+* link:specs/44-evidence-records.adoc[44 — RFC 4998 Evidence Record Syntax]
+* link:specs/45-long-term-archival.adoc[45 — Long-term archival + periodic re-quorum]
+
+=== Algorithm specifications
+
+* link:specs/50-frost-ed25519.adoc[50 — FROST Ed25519] — shipped
+* link:specs/51-frost-p256.adoc[51 — FROST P-256] — real Shamir+Lagrange+ECDSA
+* link:specs/52-cmp20.adoc[52 — CMP20 threshold ECDSA]
+* link:specs/53-gg18.adoc[53 — GG18 threshold ECDSA]
+* link:specs/54-elgamal-p256.adoc[54 — Threshold ElGamal-P256]
+* link:specs/55-ecies-p256.adoc[55 — Threshold ECIES-P256]
+* link:specs/56-bls.adoc[56 — Threshold BLS]
+* link:specs/57-ml-kem.adoc[57 — Threshold ML-KEM (FIPS 203)] — research
+* link:specs/58-ml-dsa-65.adoc[58 — Threshold ML-DSA-65 (FIPS 204)] — research
+* link:specs/59-fhe-bfv.adoc[59 — Threshold BFV FHE] — research
+* link:specs/60-ring-signatures.adoc[60 — Threshold ring signatures] — research
+
+=== Mode 2 (PKI replacement) specifications
+
+* link:specs/70-pkcs11-server.adoc[70 — PKCS#11 v3.0 dispatch server]
+* link:specs/71-openssl-provider.adoc[71 — OpenSSL 3.0 provider]
+* link:specs/72-jce-provider.adoc[72 — Java Cryptography Extension provider]
+* link:specs/73-tls-signer.adoc[73 — TLS 1.3 signature callback]
+
+=== Mode 3 (Certificate PKI) specifications
+
+* link:specs/80-cnml-deployment.adoc[80 — OIML CNML flagship deployment]
+* link:specs/81-cross-org-recognition.adoc[81 — Cross-organization recognition (OIML MAA pattern)]
+* link:specs/82-thunderbird-patterns.adoc[82 — Thunderbird-inspired patterns] — escrow + revocation
+
+=== Security and compliance
+
+* link:specs/90-security-model.adoc[90 — Security model]
+* link:specs/91-threat-model.adoc[91 — Threat model]
+* link:specs/92-fips-140.adoc[92 — FIPS 140-3 strategy]
+* link:specs/93-privacy.adoc[93 — Privacy and data minimization]
+
+=== Governance and project
+
+* link:specs/99-roadmap-timeline.adoc[99 — Roadmap timeline]
+* link:specs/100-governance.adoc[100 — Project governance]
+* link:specs/101-community.adoc[101 — Community and contribution]
+
+== Diagrams
+
+Each spec includes architectural diagrams in SVG. Source diagrams live
+in `images/` (currently `confium-arch.svg`, `confium-tests.svg`,
+`rnp-crypto-arch.svg` from the 2022 report).
+
+New diagrams being added in this multi-spec rollout:
+
+* `three-mode-architecture.svg` — high-level Mode 1/2/3 layout
+* `cnml-tier-hierarchy.svg` — BIML → IA → TL/Mfr-Model → Instance
+* `async-session-lifecycle.svg` — coordinator state machine
+* `share-reshare.svg` — committee evolution protocol
+* `transparency-log.svg` — Merkle tree + OTS anchoring
+* `mode2-pkcs11-dispatch.svg` — PKCS#11 server flow
+* `plugin-registry.svg` — `register_interface!` link-time registration
+
+== Cross-references
+
+Each spec cross-references:
+
+* Implementation source: `https://github.com/confium/confium/tree/main/crates/<crate-name>`
+* Engineering roadmap doc: `https://github.com/confium/confium/blob/main/TODO.roadmap/<n>-<name>.md`
+* API documentation: `https://docs.rs/<crate-name>`
+
+== Anti-goals
+
+* **Not** duplicating API reference (RustDoc is canonical)
+* **Not** duplicating engineering roadmap (`TODO.roadmap/` in main repo is canonical)
+* **Not** duplicating operational runbooks (operator-managed `infrastructure/` is canonical)
+
+This repo is for **what** Confium is (specifications) and **how it works**
+(diagrams + behavioral invariants), not for **how to deploy it** or
+**what's next on the roadmap**.
+
+== License
+
+BSD-2-Clause. Diagrams are CC-BY-4.0.
+
+== Authoritative source
+
+The canonical version of this repository is
+https://github.com/confium/confium-report[`github.com/confium/confium-report`].
