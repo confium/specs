@@ -1,0 +1,64 @@
+= PKCS#11 Server
+:product: pki
+:audience: ca-operator, devsecops
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-pkcs11-server`.
+
+== Motivation
+
+Many applications consume HSMs via PKCS#11. Confium can act as a drop-in PKCS#11 module that dispatches sign/verify/decrypt calls into a threshold signing cluster instead of a single HSM.
+
+== Scope
+
+* PKCS#11 v3.0 API surface (sign, verify, key objects, sessions)
+* Dispatch of sign ops to a threshold signing backend
+* Read-only key objects backed by joint public keys
+* Session management
+
+== Out of scope
+
+* Non-threshold backend (use a real HSM)
+* Raw RSA / AES key operations not relevant to threshold signing
+* Token hardware drivers (we don't talk to HSMs; we ARE the HSM replacement)
+
+== Specification
+
+=== Module shape
+
+The server runs as a daemon (`confium-pkcs11-server`). The PKCS#11 module loads the daemon via a stub library; all calls are RPC'd to the daemon.
+
+=== Threshold dispatch
+
+Each PKCS#11 `C_Sign` call maps to:
+
+. Look up the key object → corresponding threshold key handle.
+. Dispatch a sign request to the threshold signing cluster.
+. Wait for quorum + signing ceremony to complete.
+. Return the signature as if from a local HSM.
+
+=== Configuration
+
+```toml
+[server]
+listen = "127.0.0.1:2345"
+
+[keys.my_key]
+threshold_key_id = "my-key"
+backend = "confium-signerd"
+backend_url = "https://signerd.internal:7000"
+```
+
+== Security considerations
+
+* The PKCS#11 server must run on the same host as the consumer (or over a TLS-only link).
+* Threshold signing cluster must be reachable; PKCS#11 calls block until threshold ceremony completes.
+* Per-operation timeout must be longer than the longest expected signing ceremony.
+
+== References
+
+* OASIS PKCS#11 v3.0 specification
+* Confium source: `crates/confium-pkcs11-server`

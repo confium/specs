@@ -1,4 +1,5 @@
 = Specification 80 — OIML CNML flagship deployment
+:product: pki
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
 :toc:

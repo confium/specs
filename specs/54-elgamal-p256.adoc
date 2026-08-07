@@ -1,4 +1,5 @@
 = Specification 54 — Threshold ElGamal over P-256
+:product: threshold
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
 :toc:

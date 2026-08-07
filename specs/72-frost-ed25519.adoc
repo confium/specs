@@ -1,0 +1,49 @@
+= FROST over Ed25519
+:product: threshold
+:audience: security-engineer, blockchain-dev
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-tc-frost-ed25519`.
+
+== Motivation
+
+FROST (Komlo & Goldberg 2020) is a 2-round threshold Schnorr signature protocol. FROST over Ed25519 is preferred for blockchain applications where Ed25519 is the curve of choice (Solana, Polkadot, Cardano, etc.).
+
+== Scope
+
+* T-of-N threshold EdDSA over Ed25519
+* Two rounds: pre-signing (nonce commitment), signing
+* Shamir secret sharing + Feldman VSS for DKG
+* Schnorr signature combining
+
+== Out of scope
+
+* FROST over P-256 (see link:51-frost-p256.adoc[])
+* Other EdDSA curves (Ed448)
+
+== Specification
+
+=== Round 1 — DKG (Feldman VSS)
+
+Each party commits to a random polynomial `f_i(x)` of degree `T-1`. The joint secret `x = Σ f_i(0)`, and each party's share is `x_i = Σ f_j(i)`.
+
+=== Round 2 — Signing
+
+. Each signing party `i` generates `(d_i, e_i)` nonce pair, broadcasts commitments `D_i = d_i·G, E_i = e_i·G`.
+. Coordinator broadcasts the binding factor `ρ = H(commitments || message)`.
+. Each party computes response `z_i = d_i + (e_i · ρ) + λ_i · s_i · c`, where `λ_i` is the Lagrange coefficient and `c` is the Fiat-Shamir challenge.
+. Coordinator aggregates: `z = Σ z_i`. Final signature is `(R, z)`.
+
+== Security considerations
+
+* Nonces MUST NEVER be reused. Confium uses RFC 8941 deterministic nonce derivation.
+* The binding factor `ρ` MUST be bound to ALL commitments AND the message.
+* List of signing parties MUST be agreed before any nonce is broadcast.
+
+== References
+
+* Komlo, C., & Goldberg, I. (2020). *FROST: Flexible Round-Optimized Schnorr Threshold Signatures*. Cryptology ePrint Archive, 2020/852.
+* Confium source: `crates/confium-tc-frost-ed25519`

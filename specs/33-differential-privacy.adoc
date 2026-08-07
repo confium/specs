@@ -1,0 +1,58 @@
+= Differential Privacy
+:product: privacy
+:audience: privacy-dev, compliance
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-privacy/src/dp.rs`.
+
+== Motivation
+
+Aggregating user data leaks information even when individual records are "anonymized". Differential privacy (DP) provides formal, quantifiable guarantees about how much any individual's contribution affects the output.
+
+== Scope
+
+* Pure DP (ε-DP)
+* Approximate DP ((ε, δ)-DP)
+* Zero-concentrated DP (zCDP) — better composition
+* Renyi DP (RDP) — better analysis
+* Common mechanisms: Laplace, Gaussian, Exponential
+
+== Out of scope
+
+* Local DP (we cover central DP with trusted curator)
+* Synthetic data generation (separate feature)
+
+== Specification
+
+=== Mechanism
+
+Given query `f` with sensitivity `Δf`:
+
+* Laplace mechanism: `f(D) + Lap(Δf/ε)`
+* Gaussian mechanism: `f(D) + N(0, (Δf)²/(2ε))` for zCDP
+
+=== Composition
+
+k-fold composition under zCDP: total `ρ = Σ ρ_i`.
+
+=== Budget tracking
+
+```rust
+let mut budget = ZcdpBudget::new(rho_total=1.0);
+let q1 = budget.laplace_mechanism(query1, sensitivity=1.0, epsilon=0.1);
+let q2 = budget.gaussian_mechanism(query2, sensitivity=1.0, rho=0.5);
+```
+
+== Security considerations
+
+* ε is a global budget; running queries beyond it loses all guarantees.
+* Sensitivity computation MUST be done carefully — underestimating sensitivity breaks privacy.
+* Budget tracking MUST be persistent (in-memory budget resets on restart).
+
+== References
+
+* Dwork, C., & Roth, A. (2014). *The Algorithmic Foundations of Differential Privacy*. Foundations and Trends in Theoretical Computer Science.
+* Confium source: `crates/confium-privacy/src/dp.rs`

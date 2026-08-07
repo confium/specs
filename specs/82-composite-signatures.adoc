@@ -1,0 +1,62 @@
+= Composite Signatures (PQ Migration)
+:product: pki
+:audience: security-engineer, ca-operator
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-composite`.
+
+== Motivation
+
+Post-quantum signature algorithms (ML-DSA, SLH-DSA, LMS) are standardized but their security history is short. Composite signatures combine a classical (Ed25519, ECDSA-P256) and a PQ algorithm, so the signature remains valid if EITHER algorithm stays unbroken.
+
+== Scope
+
+* Composite signature envelope format
+* Verification rules (require all components? N-of-M?)
+* Signing flow with one or more algorithms
+* Bridge to threshold: composite signing key can itself be threshold-held
+
+== Out of scope
+
+* Specific PQ algorithm internals (we wrap NIST-selected crates)
+* Mixed-vintage composites (e.g., Ed25519 + LMS but not ML-DSA)
+
+== Specification
+
+=== Envelope
+
+```
+CompositeSignature {
+  version: u8,
+  algorithm_count: u8,
+  algorithms: [Algorithm { id, parameters }],
+  components: [Component { signature_bytes }],
+}
+```
+
+Serialized via CBOR per the Confium composite spec.
+
+=== Verification
+
+Verifies each component against the corresponding public key. Default policy: ALL components must verify (strict). Looser policies (e.g., N-of-M) are configurable.
+
+=== Signing
+
+. Sign message with each private key independently.
+. Bundle all signatures into the composite envelope.
+. Distribute the envelope with the corresponding public keys.
+
+== Security considerations
+
+* Strict (ALL) verification is the default for a reason: relaxing it weakens security.
+* Algorithm selection matters: don't compose two algorithms with correlated failure modes.
+* Composite signatures are larger than single-alg signatures — plan for bandwidth.
+
+== References
+
+* NIST PQC standardization: https://csrc.nist.gov/projects/post-quantum-cryptography
+* IETF draft: Composite Signatures for Use in Internet PKI
+* Confium source: `crates/confium-composite`

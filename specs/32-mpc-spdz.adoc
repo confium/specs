@@ -1,0 +1,52 @@
+= MPC (SPDZ)
+:product: privacy
+:audience: privacy-dev, blockchain-dev
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-privacy/src/mpc.rs`.
+
+== Motivation
+
+SPDZ (Speedz, pronounced "spuds") is a malicious-secure MPC protocol for arithmetic circuits. It's the basis for general-purpose secure multi-party computation.
+
+== Scope
+
+* 2-party and N-party MPC
+* Arithmetic circuits over a prime field
+* Malicious security via SPDZ MACs
+* Online phase (fast) + offline phase (preprocessing with somewhat homomorphic encryption)
+
+== Out of scope
+
+* Boolean circuits (use garbled circuits separately)
+* Honest-majority protocols (we cover dishonest-majority SPDZ only)
+
+== Specification
+
+=== Setup
+
+. Each party generates an SPDZ keypair.
+. Parties run preprocessing to generate Beaver triples (using somewhat homomorphic encryption or oblivious transfer).
+. Triples are pre-shared and MAC'd.
+
+=== Online phase
+
+For each multiplication gate in the circuit:
+
+. Parties broadcast masked shares of their inputs.
+. Each party computes a partial output using a precomputed triple.
+. MAC check at the end confirms no cheating.
+
+== Security considerations
+
+* Preprocessing is the expensive phase; running out of triples stops the protocol.
+* MAC verification MUST happen at the end of the circuit; if MAC fails, EVERYTHING is discarded.
+* SPDZ provides malicious security with abort, not fairness (some parties may learn the output before abort).
+
+== References
+
+* Damgård, I., Pastro, V., Smart, N., & Zakarias, S. (2012). *Multiparty Computation from Somewhat Homomorphic Encryption*. CRYPTO 2012.
+* Confium source: `crates/confium-privacy/src/mpc.rs`

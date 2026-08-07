@@ -1,0 +1,71 @@
+= WASM Verifier
+:product: verify
+:audience: web-developer, devsecops
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-wasm`. Published as `@confium/confium-wasm` on npm.
+
+== Motivation
+
+Browser-side verification requires a verifier that runs client-side without a server round-trip. WASM is the natural compilation target; verifier-only design (no signing) keeps the bundle small and the threat model clean.
+
+== Scope
+
+* `wasm32-unknown-unknown` target (browser, Node, edge workers)
+* Composite signature verification (Ed25519 + ECDSA-P256)
+* Transparency inclusion proof verification
+* Certificate chain verification
+* Attribute predicate evaluation
+
+== Out of scope
+
+* Signing (server-side only; enable via `sign` feature for WASI hosts)
+* Threshold ceremony participation (uses too much memory for browser)
+
+== Specification
+
+=== Public API
+
+```typescript
+export class CompositeSignature {
+  constructor(components: Uint8Array[]);
+  verify(message: Uint8Array): CompositeVerificationResult;
+}
+
+export class Certificate {
+  static fromDer(der: Uint8Array): Certificate;
+  verifyChain(anchors: Uint8Array[]): boolean;
+  get fingerprintSha256(): string;
+  // ...
+}
+
+export function verifyInclusionWithHead(
+  proofJson: string,
+  headJson: string
+): boolean;
+```
+
+=== Feature flags
+
+* `verify-composite` (default): composite signature surface
+* `verify-transparency` (default): Merkle proof surface
+* `verify-pki` (default): cert + CMS surface
+* `verify-attributes` (default): predicate DSL
+
+=== Bundle size
+
+Default build (all features): ~460 KB WASM. With only `verify-transparency`: ~180 KB.
+
+== Security considerations
+
+* `wasm32-unknown-unknown` doesn't expose host randomness; that's fine for verification (no random nonces needed).
+* Consumer MUST verify `integrity` attribute on the `&lt;script&gt;` tag.
+* Compiled with `-C opt-level=z` for size optimization.
+
+== References
+
+* npm: https://www.npmjs.com/package/@confium/confium-wasm
+* Confium source: `crates/confium-wasm`

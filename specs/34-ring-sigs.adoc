@@ -1,0 +1,53 @@
+= Ring Signatures
+:product: privacy
+:audience: privacy-dev, blockchain-dev
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-ring`.
+
+== Motivation
+
+A ring signature proves that ONE member of a group signed a message, without revealing which. Useful for whistleblowing, anonymous credentials, and blockchain privacy.
+
+== Scope
+
+* Spontaneous ring signatures (no setup coordinator)
+* Ring sizes from 2 to N (N limited by verification cost)
+* Ed25519 and ECDSA-P256 variants
+* Threshold ring signatures (T members sign as N)
+
+== Out of scope
+
+* Traceable ring signatures (CryptoNote-style)
+* RingCT (Confidential Transactions) — out of scope
+
+== Specification
+
+=== Setup
+
+Verifier publishes a set of N public keys (the "ring"). Signer has one private key corresponding to one of the public keys.
+
+=== Signing
+
+. Signer picks their index `i` secretly.
+. For each ring member `j != i`, signer generates a fake signature share.
+. For member `i`, signer uses their real private key.
+. Closes the loop via a polynomial equation so all shares look uniformly random.
+
+=== Verification
+
+Verifier checks the polynomial equation closes (Σ shares = challenge). Cannot distinguish real from fake.
+
+== Security considerations
+
+* Ring members MUST be unaware they're included (spontaneous).
+* Ring size is a privacy/usability tradeoff: larger ring = more privacy, slower verification.
+* Signer anonymity is unconditional given a random oracle hash.
+
+== References
+
+* Rivest, R. L., Shamir, A., & Tauman, Y. (2001). *How to Leak a Secret*. ASIACRYPT 2001.
+* Confium source: `crates/confium-ring`

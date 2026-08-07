@@ -1,0 +1,33 @@
+= GG18 Threshold ECDSA
+:product: threshold
+:audience: security-engineer, devsecops
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-tc-gg18`.
+
+== Motivation
+
+GG18 (Gennaro & Goldfeder 2018) is a 4-round threshold ECDSA protocol. CMP20 supersedes GG18; use CMP20 for new deployments. GG18 is retained for interoperability with existing threshold systems.
+
+== Scope
+
+* T-of-N threshold ECDSA over P-256
+* Four rounds: key generation, pre-signing (two rounds), signing
+* Paillier homomorphic encryption with MtA
+* Identifiable abort via accusations
+
+== Out of scope
+
+* New deployments — use CMP20 instead.
+
+== Specification
+
+See CMP20 spec (link:70-cmp20.adoc[]) for the foundational MtA primitives. GG18 adds an extra pre-signing round to support identifiable abort.
+
+== References
+
+* Gennaro, R., & Goldfeder, S. (2018). *Fast Multiparty Threshold ECDSA with Fast Trustless Setup*. ACM CCS 2018.
+* Confium source: `crates/confium-tc-gg18`
