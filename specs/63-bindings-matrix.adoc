@@ -1,0 +1,82 @@
+= Bindings Parity Matrix
+:product: verify
+:audience: web-developer, devsecops, blockchain-dev
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Authoritative live version: link:++https://www.confium.org/bindings/parity/++[`/bindings/parity/` on the website].
+
+== Motivation
+
+Confium has bindings in 5 languages (Rust, Python, Ruby, WASM/TypeScript, Go, plus sibling-repo Ruby gem). Each binding has different coverage. The parity matrix documents which features are available where, so consumers know what to expect.
+
+== Scope
+
+* Feature-by-feature per-language matrix
+* Status: ✅ shipped / 🚧 in progress / ❌ not planned
+* Last-updated timestamp per row
+
+== Out of scope
+
+* Performance benchmarks (separate doc)
+* API ergonomic comparisons
+
+== The matrix (snapshot 2026-08-07)
+
+[cols="1,1,1,1,1,1,1"]
+|===
+| Feature | Rust | Python | Ruby | WASM | Node | Go
+
+| Composite verify (Ed25519)
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅
+
+| Composite verify (ECDSA-P256)
+| ✅ | ✅ | ✅ | ✅ | ❌ | ❌
+
+| Composite sign
+| ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+
+| Transparency inclusion proof verify
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅
+
+| Transparency consistency proof verify
+| ✅ | ✅ | ❌ | ❌ | ❌ | ❌
+
+| Cert parse
+| ✅ | ✅ | ✅ | ✅ | ❌ | ❌
+
+| Cert chain verify
+| ✅ | ✅ | ✅ | ✅ | ❌ | ❌
+
+| CMS SignedData parse
+| ✅ | ✅ | ✅ | ✅ | ❌ | ❌
+
+| XMLDSig canonicalize
+| ✅ | ✅ | ✅ | ✅ | ❌ | ❌
+
+| Threshold DKG (CMP20)
+| ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+
+| Threshold sign (CMP20)
+| ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+|===
+
+== Maintenance
+
+* Update on every binding release.
+* Auto-generate from per-language `parity.yaml` files (TODO).
+* Status icons:
+** ✅ = shipped and tested
+** 🚧 = implementation in progress
+** ❌ = not planned (will not ship in current scope)
+
+== Security considerations
+
+N/A — this is a documentation spec.
+
+== References
+
+* Live matrix: link:++https://www.confium.org/bindings/parity/++[]
+* Confium source: `crates/confium-python`, `crates/confium-wasm`, `crates/confium-go`, sibling repo `confium-ruby`

@@ -1,0 +1,52 @@
+= Private Set Intersection (PSI)
+:product: privacy
+:audience: privacy-dev, compliance
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-privacy/src/psi.rs`.
+
+== Motivation
+
+PSI lets two parties compute the intersection of their private sets without revealing anything beyond the intersection (or its size, or a function of it). Common applications: ad-conversion measurement, contact discovery, password breach checking.
+
+== Scope
+
+* 2-party PSI (ECDH-based, semi-honest)
+* N-party PSI (generalized via coordinator)
+* Circuit-PSI: compute arbitrary functions over the intersection (not just reveal it)
+* Cardinality-only mode (reveals |A ∩ B|, not the elements)
+
+== Out of scope
+
+* Malicious-secure PSI (out of scope for v0.3; planned for v0.4)
+
+== Specification
+
+=== ECDH-PSI (2-party)
+
+. Server blinds each element of set `S` as `H(s)·d_s`, where `d_s` is server's private ECDH key. Sends blinded set to client.
+. Client blinds each element of set `C` as `H(c)·d_c`, then re-blinds server's blinded set as `(H(s)·d_s)·d_c`. Sends client's blinded set to server.
+. Server re-blinds client's blinded set as `(H(c)·d_c)·d_s`.
+. Server compares `H(s)·d_s·d_c` (own double-blind) with `H(c)·d_c·d_s` (received from client). Equality implies `s == c`.
+
+=== Cardinality-only
+
+Run as above but instead of returning matches, return count.
+
+=== Circuit-PSI
+
+Run as above, then feed the intersection into a garbled-circuits MPC to compute the desired function.
+
+== Security considerations
+
+* Hash `H` MUST be collision-resistant (SHA-256 minimum).
+* ECDH keys MUST be freshly generated per session.
+* ECDH-PSI is semi-honest secure; malicious security requires ZK proofs of correct blinding.
+
+== References
+
+* Chase, M., & Miao, P. (2020). *Private Set Intersection in the Internet Setting*. USENIX Security 2020.
+* Confium source: `crates/confium-privacy/src/psi.rs`

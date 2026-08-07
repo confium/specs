@@ -1,0 +1,57 @@
+= Keyless Signing Flow
+:product: keyless
+:audience: oss-maintainer, devsecops
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** End-to-end reference implementation: `crates/confium-examples/examples/keyless_github_action.yml`.
+
+== Motivation
+
+This spec ties together OIDC binding (link:90-oidc-binding.adoc[]), short-lived certs (link:92-short-lived-cert.adoc[]), and transparency log anchoring into a single coherent signing ceremony.
+
+== Scope
+
+* End-to-end keyless signing ceremony
+* Integration with GitHub Actions, GitLab CI
+* Verification flow
+* Transparency log anchoring
+
+== Out of scope
+
+* Threshold CA internals (covered by link:81-threshold-ca.adoc[])
+* OIDC JWT verification internals (covered by link:90-oidc-binding.adoc[])
+
+== Specification
+
+=== Signing ceremony
+
+. CI/CD starts; OIDC JWT available in env.
+. CI fetches a short-lived cert from Confium keyless endpoint (using OIDC JWT).
+. CI generates ephemeral keypair locally.
+. CI signs artifact with ephemeral private key.
+. CI uploads `(artifact_hash, signature, cert)` to Confium keyless endpoint.
+. Confium endpoint anchors the tuple to its transparency log (sequence N, root R).
+. CI publishes a release referencing the log sequence.
+
+=== Verification ceremony
+
+. Verifier fetches `(artifact, signature, cert, inclusion_proof)` from the log.
+. Verifier validates inclusion proof against log root `R` (witness-gossiped or Bitcoin-anchored).
+. Verifier validates cert chain: ephemeral cert → Confium keyless CA → Confium root.
+. Verifier validates OIDC subject claim matches expected source (e.g., `github.com/myorg/myrepo@refs/tags/v1.0.0`).
+. Verifier validates signature.
+
+== Security considerations
+
+* The ephemeral private key MUST live only in CI memory; never persisted.
+* The short-lived cert MUST be embedded in the transparency log entry (so future verification doesn't depend on the CA staying online).
+* Verification MUST reject certs whose OIDC subject doesn't match the verifier's policy.
+
+== References
+
+* link:90-oidc-binding.adoc[]
+* link:92-short-lived-cert.adoc[]
+* link:42-transparency-log.adoc[]

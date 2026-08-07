@@ -1,0 +1,65 @@
+= OIDC Binding for Keyless Signing
+:product: keyless
+:audience: oss-maintainer, devsecops
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-oidc`.
+
+== Motivation
+
+OIDC identity providers (GitHub Actions, Google, GitLab, Azure AD, Okta) issue short-lived JWTs proving who is making a request. Keyless signing binds these JWTs to short-lived signing certificates, eliminating long-lived signing keys.
+
+== Scope
+
+* Supported OIDC providers: GitHub Actions, Google, GitLab CI, Azure AD, Okta
+* JWT verification + claim validation
+* Mapping from OIDC subject to certificate subject
+* Short-lived cert issuance from threshold keys
+
+== Out of scope
+
+* Specific provider UIs (we consume the JWT, not the auth flow)
+* Long-lived certificates (keyless is short-lived by definition)
+
+== Specification
+
+=== Flow
+
+. CI/CD run requests an OIDC JWT from the provider (GitHub Actions exposes this via `ACTIONS_ID_TOKEN_REQUEST_URL`).
+. CI submits JWT + signing request to Confium keyless endpoint.
+. Confium verifies JWT signature against provider's published JWKS.
+. Confium validates claims: `iss`, `aud`, `sub`, `exp`, `iat`, plus custom claims (repo, branch, workflow).
+. Confium issues short-lived cert (default TTL: 10 min) binding the OIDC subject to a Confium-held ephemeral public key.
+. CI signs the artifact with the ephemeral private key.
+. CI uploads signature + cert to Confium transparency log.
+. Ephemeral private key is destroyed.
+
+=== Cert shape
+
+```
+Subject: CN=<oidc-sub>
+Issuer: CN=Confium Keyless CA,O=Confium
+Validity: now..now+10min
+Extensions:
+  - OIDC Issuer: <provider>
+  - OIDC Subject: <sub claim>
+  - GitHub repo (if applicable): <owner>/<repo>
+  - GitHub workflow (if applicable): <workflow>
+  - GitHub ref (if applicable): <ref>
+```
+
+== Security considerations
+
+* Provider JWKS must be fetched fresh (no stale caches) and pinned to expected issuer.
+* `aud` claim must be Confium-specific (prevents cross-service JWT reuse).
+* Cert TTL should be as short as feasible — 10 min is conservative.
+* Threshold CA root signs all keyless certs; ephemeral cert cannot be forged without quorum.
+
+== References
+
+* link:91-keyless-flow.adoc[Keyless Signing Flow]
+* link:92-short-lived-cert.adoc[Short-Lived Certificate Format]
+* Confium source: `crates/confium-oidc`

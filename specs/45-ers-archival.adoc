@@ -1,0 +1,58 @@
+= ERS Long-Term Archival
+:product: transparency
+:audience: compliance
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-transparency/src/ers.rs`.
+
+== Motivation
+
+Cryptographic algorithms weaken over time. A signature valid today may be forgeable in 20 years. Evidence Record Syntax (ERS, RFC 4998) provides a structure for renewing archival evidence without re-signing the original artifact.
+
+== Scope
+
+* ERS envelope format
+* Renewal cadence: every algorithm degradation epoch (default: 5 years)
+* Hash and signature renewal procedures
+* Verification of an ERS archive
+
+== Out of scope
+
+* Storage media longevity (out of scope for crypto layer)
+* Archive format for artifacts themselves (ERS only covers evidence)
+
+== Specification
+
+=== Envelope
+
+An ERS envelope contains:
+
+. Original artifact hash
+. Sequence of `(timestamp, algorithm_suite, evidence)` renewal records
+. Each renewal record is timestamped by a TSA and signed by an archive authority
+
+=== Renewal
+
+On each epoch:
+
+. Compute current strongest available hash of artifact (e.g., SHA-512 then later SHA-3).
+. Get a timestamp from a TSA (RFC 3161).
+. Sign the new hash + timestamp + previous envelope.
+. Append as a new renewal record.
+
+=== Verification
+
+Verify each renewal record in sequence, confirming the chain of custody and that each algorithm was unbroken at its timestamp.
+
+== Security considerations
+
+* TSA must be trusted at the time of timestamping; revocation of TSA trust retroactively invalidates the chain.
+* Archive authority key compromise breaks the chain forward (but not backward).
+
+== References
+
+* RFC 4998: Evidence Record Syntax (ERS)
+* Confium source: `crates/confium-transparency/src/ers.rs`

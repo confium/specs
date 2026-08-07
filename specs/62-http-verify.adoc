@@ -1,0 +1,71 @@
+= HTTP Verification Service
+:product: verify
+:audience: web-developer, devsecops
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-verify-server`.
+
+== Motivation
+
+Not every client can run WASM (curl, server-to-server, IoT). The HTTP verification service exposes a stateless REST API for verifying signatures, proofs, and cert chains.
+
+== Scope
+
+* Stateless HTTP/JSON API
+* Endpoints: composite verify, transparency verify, cert chain verify, batch verify
+* Optional LRU cache for repeated verifications
+* Optional Prom metrics
+
+== Out of scope
+
+* Authentication (verifier is public; protect at network layer if needed)
+* Rate limiting (deploy behind Cloudflare or similar)
+
+== Specification
+
+=== Endpoints
+
+```
+POST /v1/composite/verify
+POST /v1/transparency/inclusion/verify
+POST /v1/pki/cert-chain/verify
+POST /v1/batch/verify    (accepts a list of any of the above)
+```
+
+=== Request shape
+
+```json
+{
+  "message": "base64...",
+  "signature": "base64...",
+  "public_keys": ["base64..."]
+}
+```
+
+=== Response shape
+
+```json
+{
+  "valid": true,
+  "verified_components": ["ed25519", "ecdsa-p256"],
+  "checked_at": "2026-08-07T12:34:56Z"
+}
+```
+
+=== Cache
+
+Optional LRU cache keyed by `hash(message || signature)`. Default size: 10,000 entries. Cache hit returns cached result; miss performs full verification.
+
+== Security considerations
+
+* The service is stateless; deployment must NOT log request bodies (they may contain sensitive artifacts).
+* The service must run on TLS only. No plaintext HTTP listener.
+* Cache key collision risk: hash must use a cryptographic hash function (SHA-256).
+
+== References
+
+* Confium source: `crates/confium-verify-server`
+* Related: link:61-wasm-verifier.adoc[]

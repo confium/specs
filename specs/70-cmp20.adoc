@@ -1,0 +1,62 @@
+= CMP20 Threshold ECDSA
+:product: threshold
+:audience: security-engineer, devsecops, blockchain-dev
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+This spec is a **draft**. The reference implementation lives in `crates/confium-tc-cmp20`.
+
+== Motivation
+
+CMP20 (Gennaro & Goldfeder 2020) is the canonical 3-round threshold ECDSA protocol over P-256. It supersedes GG18 with simpler rounds and better performance. Confium's CMP20 implementation uses real Paillier homomorphic encryption and MtA (Multiplicative-to-Additive) conversion.
+
+== Scope
+
+* 2-of-N up to T-of-N threshold signing
+* P-256 curve
+* Three rounds: key generation (DKG), pre-signing, signing
+* In-process driver for testing + multi-party coordinator for production
+* Wire format for cross-party messages
+
+== Out of scope
+
+* Other curves (use FROST-Ed25519 for Ed25519)
+* BLS signatures (use `confium-tc-bls`)
+* Post-quantum schemes (use composite signatures via `confium-composite`)
+
+== Specification
+
+=== Round 1 — Key generation (DKG)
+
+Each party `i`:
+
+. Generates a Paillier keypair `(N_i, λ_i)`.
+. Generates an ECDSA secret share `x_i ∈ Z_q`.
+. Publishes `N_i`, a Feldman-VSS commitment to `x_i·G`, and a Schnorr proof of knowledge of `x_i`.
+. Encrypts `x_i` under each other party's Paillier public key.
+
+=== Round 2 — Pre-signing
+
+Each party computes a random nonce pair `(k_i, γ_i)` and runs MtA with each other party to compute additive shares of `k·γ` and `k·x` without revealing them.
+
+=== Round 3 — Signing
+
+The signer reveals the public nonce `R = k^{-1}·G`, computes the signature share `s_i = k_i·(m + r·x_i)`, and the parties combine shares into the final signature `(r, s)`.
+
+=== Verification
+
+The final signature is verified against the joint public key `Y = Σ x_i · G` using standard ECDSA verification.
+
+== Security considerations
+
+* Paillier modulus `N_i` must be ≥ 2048 bits (Confium default: 3072).
+* Range proofs are required on every MtA ciphertext.
+* Nonces `k_i`, `γ_i` must NEVER be reused across sessions.
+* All inter-party messages MUST be authenticated and transcript-bound.
+
+== References
+
+* Gennaro, R., & Goldfeder, S. (2020). *One Round Threshold ECDSA with Identifiable Abort*. Cryptology ePrint Archive, 2020/540.
+* Confium source: `crates/confium-tc-cmp20`

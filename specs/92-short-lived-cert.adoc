@@ -1,0 +1,66 @@
+= Short-Lived Certificate Format
+:product: keyless
+:audience: security-engineer, devsecops
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-oidc` + `crates/confium-pki`.
+
+== Motivation
+
+Keyless signing needs a cert format that's X.509-compatible (so existing verification paths work) but carries OIDC claims in a structured way.
+
+== Scope
+
+* X.509 v3 cert shape for keyless flow
+* Standard + Confium-specific extensions
+* Validation rules
+
+== Out of scope
+
+* Long-lived CA certs (covered by link:81-threshold-ca.adoc[])
+* OCSP for keyless certs (certs are too short-lived; just check the transparency log)
+
+== Specification
+
+=== X.509 envelope
+
+Standard X.509 v3 certificate, DER-encoded. Reuses existing ASN.1 schema.
+
+=== Extensions
+
+Standard:
+
+* `Subject Alternative Name` (critical): contains OIDC `sub` claim
+* `Basic Constraints`: CA=false, pathlen=0
+* `Key Usage`: digitalSignature
+* `Extended Key Usage`: codeSigning, emailProtection (depending on context)
+
+Confium-specific (under Confium's private OID arc `1.3.6.1.4.1.X`):
+
+* `ConfiumOIDCIssuer`: the OIDC provider's issuer URL
+* `ConfiumOIDCSubject`: the full OIDC `sub` claim
+* `ConfiumWorkflowRef`: GitHub workflow path or GitLab CI pipeline URL (if applicable)
+* `ConfiumTransparencyLogEntry`: `(log_id, sequence, root)` triple — log anchor for this cert
+
+=== Validation
+
+. Standard X.509 chain validation to Confium's keyless root CA.
+. ConfiumOIDCIssuer matches verifier policy.
+. ConfiumOIDCSubject matches expected subject.
+. ConfiumTransparencyLogEntry's inclusion proof is valid (verifier checks against current log root).
+. Cert `NotAfter` is in the future (cert is still within its short TTL — typically 10 minutes from issuance, NOT from verification time).
+
+== Security considerations
+
+* TTL is 10 minutes from issuance. After expiry, the cert cannot be used to sign new artifacts, BUT existing signatures remain verifiable because the cert is anchored in the transparency log.
+* Verifier MUST check the transparency log inclusion, not just the cert chain — otherwise the CA could retrospectively issue a cert for the same OIDC subject.
+* Confium's private OID arc extensions MUST be marked non-critical (so non-Confium verifiers don't break).
+
+== References
+
+* link:90-oidc-binding.adoc[]
+* RFC 5280: Internet X.509 PKI Certificate and CRL Profile
+* Confium source: `crates/confium-oidc`, `crates/confium-pki`

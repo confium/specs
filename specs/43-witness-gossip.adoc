@@ -1,0 +1,57 @@
+= Witness Gossip Protocol
+:product: transparency
+:audience: compliance, ca-operator
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-log-server` (gossip module).
+
+== Motivation
+
+A single transparency log can silently rewrite history by re-issuing a tree head. Witness gossip distributes the latest tree head to multiple independent witnesses, so any rewrite becomes detectable.
+
+== Scope
+
+* Tree head cross-confirmation across witnesses
+* Gossip transport (HTTP, WebSocket, or manual)
+* Witness signature on observed tree heads
+* Fork detection: log presenting different heads to different witnesses
+
+== Out of scope
+
+* Certificate Transparency's specific gossip (RFC 6962 §5; we cover the abstract pattern)
+* Specific witness operators (anyone can run a witness)
+
+== Specification
+
+=== Tree head shape
+
+```
+{
+  "log_id": "sha256:...",
+  "tree_size": 4823,
+  "timestamp": 1722988800,
+  "root_hash": "sha256:abc..."
+}
+```
+
+=== Witness signature
+
+Witness signs the tree head canonical JSON with their Ed25519 private key. The signed head is republishable to other witnesses (2nd-hand gossip).
+
+=== Fork detection
+
+A monitor observes two witnesses reporting different `root_hash` for the same `(log_id, tree_size, timestamp)`. This is a provable fork — the log lied.
+
+== Security considerations
+
+* Witnesses MUST sign canonical-encoded tree heads (any whitespace variance breaks verifiability).
+* 2nd-hand gossip (republishing) requires that witnesses trust each other's signatures; otherwise, every witness must directly query the log.
+* Witnesses MUST publish their public keys out-of-band (DNS, transparency log of their own, etc.).
+
+== References
+
+* Confium source: `crates/confium-log-server/src/gossip.rs`
+* Related: link:42-transparency-log.adoc[]

@@ -1,4 +1,5 @@
 = Specification 23 — Async session coordinator
+:product: threshold
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
 :toc:

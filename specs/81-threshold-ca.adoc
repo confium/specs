@@ -1,0 +1,67 @@
+= Threshold CA Lifecycle
+:product: pki
+:audience: ca-operator, security-engineer
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-pki` + `crates/confium-tc-cmp20` + `crates/confium-pkcs11-server`.
+
+== Motivation
+
+A traditional CA has a single root private key. Compromise of that key compromises every certificate issued under it. A threshold CA splits the root key across N parties; issuing requires T-party quorum.
+
+== Scope
+
+* CA root key generation via threshold DKG
+* Certificate issuance: CSR validation → threshold sign → publish
+* CRL signing: same threshold quorum
+* OCSP responder: short-lived threshold-signed responses
+* Key rotation: reshare without re-keying the public key
+
+== Out of scope
+
+* Specific CA management UI (out of scope; consumers build their own)
+* Cross-signing with classical CAs (covered in PKCS#11 server spec)
+
+== Specification
+
+=== DKG ceremony
+
+. T parties gather (in person or via secure multi-party channel).
+. Run CMP20 DKG (`crates/confium-tc-cmp20::keygen`) producing T shares.
+. Each party stores their share under HSM/PKCS#11 protection.
+. Joint public key is the CA root.
+
+=== Issuance
+
+. Client submits CSR.
+. CA server validates CSR (signature, requestor identity, etc.).
+. CA server requests threshold sign from quorum of T parties.
+. Quorum parties run CMP20 sign ceremony on CSR + serial + validity.
+. Returned signature is bundled into X.509 cert and published.
+
+=== Revocation (CRL)
+
+. Revocation request validated.
+. CRL payload (revoked serials list) submitted to threshold quorum.
+. Signed CRL published.
+
+=== OCSP
+
+. OCSP request arrives at responder.
+. Responder holds a short-lived threshold-signed attestation of cert status.
+. Refresh cycle (default 1 hour): responder goes back to quorum for fresh attestation.
+
+== Security considerations
+
+* At least T shares must be online to issue certs. T must be chosen to balance liveness vs. compromise tolerance.
+* Share storage MUST use HSM, never plaintext on disk.
+* All threshold sessions MUST be logged for audit.
+
+== References
+
+* link:81-threshold-ca.adoc[This spec]
+* link:22-threshold-session.adoc[Threshold Session]
+* link:70-cmp20.adoc[CMP20]

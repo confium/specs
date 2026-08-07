@@ -1,0 +1,52 @@
+= OTS Bitcoin Anchoring
+:product: transparency
+:audience: compliance, ca-operator
+:status: draft
+:revdate: 2026-08-07
+
+== Status
+
+**Draft.** Reference implementation: `crates/confium-transparency/src/ots.rs`.
+
+== Motivation
+
+A transparency log's tree head can be anchored to a public blockchain (Bitcoin, by default) so that retroactive modification of the log becomes computationally infeasible (would require rewriting Bitcoin history). OpenTimestamps (OTS) provides the standard format.
+
+== Scope
+
+* Periodic anchoring of tree heads to Bitcoin via OTS
+* Proof format per RFC 8941 / OTS v1
+* Verification of an anchor proof
+
+== Out of scope
+
+* Anchoring to other chains (Ethereum, Solana) — same pattern, separate implementation
+* Pay-to-anchor services (we use the OTS calendar public API by default)
+
+== Specification
+
+=== Anchor event
+
+On a schedule (default: every 1 hour, when ≥1 new entry appended):
+
+. Compute the current tree head `H = sha256(tree_size || root_hash)`.
+. Submit `H` to the OTS calendar API (`https://a.pool.opentimestamps.org`).
+. Receive a `.ots` proof file; store it alongside the log.
+
+=== Proof verification
+
+To verify a tree head `H` was anchored:
+
+. Load the `.ots` proof file.
+. Verify against the Bitcoin header chain at the claimed block height.
+. Confirm the on-chain transaction commits to `H`.
+
+== Security considerations
+
+* Anchoring interval is a tradeoff: shorter = more Bitcoin fees, longer = larger "vulnerable window" during which a rewrite is undetectable.
+* Verification requires access to Bitcoin headers — clients either run a full node or trust a header service.
+
+== References
+
+* OpenTimestamps: https://opentimestamps.org/
+* Confium source: `crates/confium-transparency/src/ots.rs`

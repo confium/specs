@@ -1,0 +1,85 @@
+= Confium Specs by Product
+:author: Confium Project
+:toc: macro
+:toclevels: 3
+
+Confium is organized into 6 products. This index lists every spec under its primary product. Mode 1/2/3 terminology is deprecated in favor of product names; specs that still reference modes are retained for historical context.
+
+== Threshold
+
+T-of-N distributed signing — CMP20, GG18, FROST, MuSig, BLS.
+
+* link:22-threshold-session.adoc[Threshold Session] — session lifecycle, party registry, message dispatch
+* link:23-async-coordinator.adoc[Async Coordinator] — multi-round orchestration service
+* link:24-share-reshare.adoc[Share & Reshare] — Herzberg refresh, T/N changes without re-keying
+* link:51-frost-p256.adoc[FROST over P-256] — 2-round threshold ECDSA with Feldman VSS
+* link:54-elgamal-p256.adoc[Threshold ElGamal over P-256] — threshold encryption
+* link:70-cmp20.adoc[CMP20 Threshold ECDSA] *(draft)* — 3-round ECDSA with Paillier MtA
+* link:71-gg18.adoc[GG18 Threshold ECDSA] *(draft)* — 4-round ECDSA (legacy; prefer CMP20)
+* link:72-frost-ed25519.adoc[FROST over Ed25519] *(draft)* — 2-round threshold EdDSA
+
+== Transparency
+
+RFC 6962 append-only logs with witness gossip, OTS anchoring, ERS archival.
+
+* link:42-transparency-log.adoc[Transparency Log] — RFC 6962 inclusion/consistency proofs
+* link:43-witness-gossip.adoc[Witness Gossip] *(draft)* — distributing log roots to witnesses
+* link:44-ots-anchoring.adoc[OTS Bitcoin Anchoring] *(draft)* — anchoring tree heads to Bitcoin
+* link:45-ers-archival.adoc[ERS Long-Term Archival] *(draft)* — Evidence Record Syntax for multi-decade archival
+
+== PKI
+
+Threshold-backed certificate authority, OCSP/CRL, ACME, composite signatures.
+
+* link:80-cnml-deployment.adoc[CNML Deployment] — OIML CNML flagship Mode 3 deployment
+* link:81-threshold-ca.adoc[Threshold CA Lifecycle] *(draft)* — issue, revoke, CRL from threshold keys
+* link:82-composite-signatures.adoc[Composite Signatures] *(draft)* — PQ migration via multi-alg composites
+* link:83-pkcs11-server.adoc[PKCS#11 Server] *(draft)* — drop-in HSM replacement via PKCS#11 v3.0
+
+== Keyless
+
+OIDC-based keyless signing with short-lived certificates.
+
+* link:90-oidc-binding.adoc[OIDC Binding] *(draft)* — binding short-lived certs to OIDC identities
+* link:91-keyless-flow.adoc[Keyless Signing Flow] *(draft)* — end-to-end ceremony
+* link:92-short-lived-cert.adoc[Short-Lived Certificate Format] *(draft)* — cert shape and anchoring
+
+== Privacy
+
+Privacy-preserving cryptographic primitives.
+
+* link:31-psi.adoc[Private Set Intersection] *(draft)* — ECDH-PSI and other variants
+* link:32-mpc-spdz.adoc[MPC (SPDZ)] *(draft)* — secure multi-party computation
+* link:33-differential-privacy.adoc[Differential Privacy] *(draft)* — zCDP and epsilon-delta budgets
+* link:34-ring-sigs.adoc[Ring Signatures] *(draft)* — spontaneous anonymous group signatures
+
+== Verify
+
+Verification surface across languages and environments.
+
+* link:61-wasm-verifier.adoc[WASM Verifier] *(draft)* — `@confium/confium-wasm` browser/Node/edge
+* link:62-http-verify.adoc[HTTP Verification Service] *(draft)* — `confium-verify-server`
+* link:63-bindings-matrix.adoc[Bindings Parity Matrix] *(draft)* — feature coverage per language
+
+== Cross-cutting
+
+* link:00-framework-overview.adoc[Framework Overview] — 30,000-foot view of Confium
+* link:02-workspace-organization.adoc[Workspace Organization] — the 6 products × 65 crates
+* link:90-security-model.adoc[Security Model] — threat model, trust boundaries, side channels
+
+== Historical (Mode 1/2/3)
+
+Mode-tagged terminology is deprecated; these specs are retained for historical context.
+
+* link:01-three-modes.adoc[Three Modes] — the original mode 1/2/3 framing
+* link:10-mode1-peer-tc.adoc[Mode 1 — Peer-to-peer TC]
+* link:11-mode2-pki-replacement.adoc[Mode 2 — PKI Replacement]
+* link:12-mode3-certificate-pki.adoc[Mode 3 — Certificate PKI]
+
+== Adding a new spec
+
+1. Pick the next free number in the relevant product range (30s for privacy, 60s for verify, etc.).
+2. Copy the structure of an existing spec.
+3. Set the `:product:` attribute in the header.
+4. Add a link entry to this index.
+5. Set status to `:status: draft` until reviewed.
