@@ -1,7 +1,7 @@
 = MPC (SPDZ)
 :product: privacy
 :audience: privacy-dev, blockchain-dev
-:status: draft
+:status: accepted
 :revdate: 2026-08-07
 
 == Status

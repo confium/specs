@@ -1,7 +1,7 @@
 = WASM Verifier
 :product: verify
 :audience: web-developer, devsecops
-:status: draft
+:status: accepted
 :revdate: 2026-08-07
 
 == Status
