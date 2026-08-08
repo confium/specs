@@ -31,3 +31,18 @@ See CMP20 spec (link:70-cmp20.adoc[]) for the foundational MtA primitives. GG18 
 
 * Gennaro, R., & Goldfeder, S. (2018). *Fast Multiparty Threshold ECDSA with Fast Trustless Setup*. ACM CCS 2018.
 * Confium source: `crates/confium-tc-gg18`
+
+== Security considerations
+
+* GG18 provides identifiable abort via accusations — if a party submits
+  an invalid share, the protocol can identify which party caused the
+  failure. This is an improvement over early threshold ECDSA protocols
+  that failed opaquely.
+* The Paillier modulus `N_i` must be ≥ 2048 bits; Confium default is 3072.
+* Range proofs are required on every MtA ciphertext to prevent malicious
+  parties from submitting out-of-range shares.
+* Nonces MUST NOT be reused across sessions. GG18 doesn't prescribe a
+  specific nonce derivation; Confium uses deterministic derivation per
+  session ID.
+* All inter-party messages MUST be authenticated and transcript-bound.
+* GG18 is 4 rounds (vs CMP20's 3). For new deployments, prefer CMP20.
