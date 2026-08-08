@@ -1,7 +1,7 @@
 = Composite Signatures (PQ Migration)
 :product: pki
 :audience: security-engineer, ca-operator
-:status: draft
+:status: accepted
 :revdate: 2026-08-07
 
 == Status

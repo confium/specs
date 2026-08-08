@@ -1,7 +1,7 @@
 = CMP20 Threshold ECDSA
 :product: threshold
 :audience: security-engineer, devsecops, blockchain-dev
-:status: draft
+:status: accepted
 :revdate: 2026-08-07
 
 == Status
