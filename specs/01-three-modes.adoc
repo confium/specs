@@ -1,6 +1,7 @@
 = Specification 01 — Three deployment modes
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
+:status: framework
 :toc:
 
 == Overview

@@ -1,5 +1,7 @@
 = Specification 24 — Share re-sharing
 :product: threshold
+:status: accepted
+:implementation: shipped
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
 :toc:

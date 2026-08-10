@@ -1,6 +1,7 @@
 = Specification 11 — Mode 2: TC PKI replacement (drop-in)
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
+:status: framework
 :toc:
 
 == Definition

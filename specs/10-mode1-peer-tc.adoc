@@ -1,6 +1,7 @@
 = Specification 10 — Mode 1: Peer-to-peer threshold cryptography
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
+:status: framework
 :toc:
 
 == Definition

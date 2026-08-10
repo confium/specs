@@ -1,6 +1,7 @@
 = Specification 12 — Mode 3: TC Certificate PKI
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
+:status: framework
 :toc:
 
 == Definition
