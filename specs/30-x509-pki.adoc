@@ -1,0 +1,126 @@
+= Specification 30 — X.509 PKI: certificates, CMS, delegation, XMLDSig
+:product: pki
+:status: draft
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Overview
+
+Confium PKI provides X.509 certificate parsing, CMS SignedData
+envelope construction and verification, scoped delegation templates,
+and XMLDSig canonicalization. The crate is designed for Mode 2
+(PKI replacement via threshold keys) and Mode 3 (custom certificate
+workflows like OIML CNML).
+
+Implemented in `confium-pki`. Feature-gated:
+`parsing` (default), `delegation` (default), `cms`, `xmldsig`.
+
+== X.509 Certificate + CSR
+
+=== Certificate
+
+The `Certificate` type wraps `x509_cert::Certificate` (from the
+`x509-cert` crate). It provides:
+
+- `from_der(&[u8])` / `from_pem(&str)` — parse.
+- `to_der()` / `to_pem()` — re-encode.
+- `fingerprint_sha256()` — SHA-256 fingerprint hex.
+- `not_before()` / `not_after()` — validity window.
+- `public_key_bytes()` — raw SPKI public key.
+- `as_inner()` — access the underlying `x509_cert::Certificate`
+  for fields not wrapped (e.g., `subject`, `issuer`).
+
+=== CSR
+
+The `CertificateSigningRequest` type wraps
+`x509_cert::request::CertReq`. Same from_der / from_pem / to_der /
+to_pem interface.
+
+=== Path validation
+
+The `path` module provides:
+
+- `CertPath<'a>` — leaf + intermediates + root anchor.
+- `validate_path(&CertPath, now)` — checks validity windows,
+  max chain length, revocation status, trust root membership.
+  Returns `VerificationResult` with per-check failure detail.
+- `verify_path_signatures(&CertPath, verifier_fn)` — calls the
+  caller-supplied verifier closure for each cert→issuer signature
+  link. The closure receives `(issuer_pubkey_bytes,
+  signed_cert_der_bytes)`.
+
+== CMS SignedData
+
+Feature: `cms`.
+
+The `cms` module constructs and verifies PKCS#7/CMS SignedData
+envelopes compatible with OpenSSL, Thunderbird, and Adobe.
+
+- `SignedData` — the parsed envelope.
+- `build_detached_signature(cert, message, signer_fn)` — construct
+  a detached CMS signature.
+- `verify_signed_data(signed_data, payload, verifier_fn)` — verify
+  every signer's signature. Returns `CmsVerificationResult` with
+  per-signer detail.
+
+== Scoped delegation
+
+Feature: `delegation`.
+
+The `delegation` module provides typed templates for "parent cert
+delegates bounded authority to child cert." Used by OIML CNML
+(Manufacturer Model Cert → Instance Cert delegation chains).
+
+- `DelegationScope` — what operations a child cert is authorized
+  for (sign cert, sign document, etc.).
+- `Constraint` — value constraints on delegated scope.
+- `validate_delegation(scope, parent_cert, child_cert)` — checks
+  that the parent cert has authority to delegate the scope.
+
+== XMLDSig + Canonicalization
+
+Feature: `xmldsig`.
+
+The `xmldsig` module provides RFC 3076 (Canonical XML 1.0) and
+RFC 3741 (Exclusive C14N) canonicalization for XML documents that
+need stable byte representations before signing.
+
+- `canonicalize(xml: &str)` — RFC 3076.
+- `canonicalize_exclusive(xml: &str)` — RFC 3741 Exclusive C14N.
+
+== VerificationResult
+
+The unified `result::VerificationResult` type aggregates
+per-check failures across cert path, CMS, and delegation
+verification:
+
+- `valid: bool` — true iff every check passed.
+- `checks: Vec<PathFailure>` — per-check detail (Expired,
+  NotYetValid, SignatureInvalid, ScopeViolation, ChainTooLong,
+  UntrustedRoot, Revoked).
+
+`VerificationResult::aggregate(&[results])` combines N results
+into one.
+
+== Error types
+
+- `CertError` — parse errors (`Der`, `Pem`, `InvalidSignature`).
+- `CmsError` — CMS construction/verification errors.
+- `DelegationError` — delegation validation errors.
+
+All error enums use `thiserror` with `#[error("...")]` messages.
+
+== Test coverage
+
+The crate has unit tests for every public method plus an
+integration test (`tests/integration.rs`) that exercises the
+full cert → CMS → delegation → path-validation flow.
+
+== See also
+
+- `confium-composite` — composite multi-algorithm signatures for
+  PQ migration (used alongside CMS).
+- `confium-transparency` — transparency log anchoring of cert
+  issuances.
+- Spec 42 — transparency log (for cert issuance anchoring).
