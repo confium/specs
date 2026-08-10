@@ -1,0 +1,70 @@
+= Specification 41 — Attribute-based signing predicates
+:product: pki
+:status: draft
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Overview
+
+Confium Attributes provides a predicate DSL for attribute-based
+threshold signing policies. Before a quorum signs a message, the
+coordinator evaluates the predicate against the set of signer
+attributes (roles, departments, jurisdictions). The signature only
+proceeds if the predicate is satisfied.
+
+Implemented in `confium-attributes`.
+
+== Predicate DSL
+
+The DSL supports:
+
+- `min_count("role:director", N)` — at least N directors must sign.
+- `any_of("role:auditor", "role:compliance")` — at least one
+  auditor or compliance officer.
+- `all_of("region:eu", "role:director")` — a director from the EU.
+- `jurisdiction("EU")` — signer's jurisdiction must match.
+- Combinators: `and(...)`, `or(...)`, `not(...)`.
+
+== API
+
+- `Predicate::parse(s: &str) -> Result<Predicate, ParseError>` —
+  parse a DSL string into the typed AST.
+- `Predicate::evaluate(&self, signer_attributes: &[Attribute]) -> bool`
+  — evaluate the predicate against the actual signer set.
+- `Attribute` — `(key: String, value: String)` pair. Example:
+  `("role", "director")`.
+
+== Bindings
+
+The predicate DSL is exposed in every language binding:
+
+- Ruby: `Confium::Attributes::Predicate`
+- Python: `confium.attributes.Predicate`
+- WASM: `@confium/confium-wasm` `Predicate` class
+
+== Error types
+
+- `ParseError` — malformed DSL expression. Carries line, column,
+  and a human-readable message.
+- `EvaluationError` — runtime evaluation failure (e.g., missing
+  attribute key in the signer set).
+
+== Security notes
+
+The DSL is intentionally limited — no general-purpose expression
+evaluation. Predicates cannot:
+
+- Access the filesystem or network.
+- Execute arbitrary code.
+- Loop indefinitely (bounded evaluation depth: 32).
+
+The parser rejects expressions deeper than 32 levels to prevent
+stack exhaustion.
+
+== See also
+
+- Spec 22 — threshold session (the coordinator evaluates
+  predicates before initiating a signing round).
+- Spec 30 — X.509 PKI (attributes can be derived from cert
+  extensions).
