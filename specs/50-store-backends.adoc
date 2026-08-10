@@ -1,0 +1,105 @@
+= Specification 50 — Compartmentalized key storage backends
+:product: threshold
+:status: draft
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Overview
+
+Confium Store provides a compartmentalized key-value storage
+abstraction with pluggable backends. Keys are organized into
+compartments (private, public, audit) with per-compartment access
+control. Backends implement a trait; the workspace ships memory,
+PKCS#11, TPM 2.0, cloud KMS, and OpenPGP card backends.
+
+Implemented in `confium-store`.
+
+== Compartment model
+
+Three compartments, MECE by design:
+
+|===
+|Compartment |What lives here |Who can read |Who can write
+
+|`private`
+|Secret keys, threshold shares
+|The local process only
+|The local process only
+
+|`public`
+|Public keys, certificates, detached signatures
+|Anyone with filesystem read access
+|The local process
+
+|`audit`
+|Append-only audit log entries
+|Anyone with filesystem read access
+|The local process (append only)
+|===
+
+== Backend trait
+
+```rust,ignore
+pub trait StoreBackend: Send + Sync {
+    fn open(options: &Options) -> Result<StoreInstance>;
+}
+
+pub struct StoreInstance {
+    // Backend-specific handle (Arc<dyn Any>)
+}
+```
+
+Each backend implements `StoreBackend` and registers itself via
+the `register_backend!` macro (link-time registration via
+`inventory`).
+
+== Shipped backends
+
+|===
+|Backend |Crate |Status
+
+|Memory (in-process)
+|`confium-store`
+|✅ Shipped
+
+|PKCS#11 v3.0
+|`confium-store-pkcs11`
+|Skeleton
+
+|TPM 2.0
+|`confium-store-tpm`
+|Skeleton (feature-gated)
+
+|Cloud KMS (AWS/GCP/Azure)
+|`confium-store-cloud`
+|Skeleton (feature-gated)
+
+|OpenPGP card (YubiKey)
+|`confium-store-openpgp-card`
+|Interface shipped
+|===
+
+== Path sanitization
+
+All caller-supplied path components (module, app, identity) are
+validated:
+
+- No `/`, `\`, or NUL characters.
+- On Windows, additional reserved characters (`< > : " | ? *`) are
+  replaced with `_` via `sanitize_for_filename`.
+- The `.` and `..` path traversal components are rejected.
+
+== Atomic writes
+
+`atomic_write(path, bytes)` writes to a sibling temp file, then
+renames over the target. Guarantees:
+
+- No partial writes visible to concurrent readers.
+- On POSIX, the rename is atomic.
+- On Windows, `MoveFileEx` with `MOVEFILE_REPLACE_EXISTING` is used.
+
+== See also
+
+- Spec 22 — threshold session (sessions load shares from the store).
+- Spec 24 — share reshare (reshare writes refreshed shares to the store).
