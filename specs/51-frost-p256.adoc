@@ -1,5 +1,7 @@
 = Specification 51 — FROST threshold signature over ECDSA P-256
 :product: threshold
+:status: accepted
+:implementation: shipped
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
 :toc:

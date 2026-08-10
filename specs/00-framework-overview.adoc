@@ -1,6 +1,7 @@
 = Specification 00 — Framework overview
 Ribose Inc. <open.source@ribose.com>
 :sectnums:
+:status: framework
 :toc:
 
 == What Confium is
