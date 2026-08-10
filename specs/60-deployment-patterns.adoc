@@ -1,0 +1,71 @@
+= Specification 60 — Threshold deployment patterns
+:product: threshold
+:status: draft
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:toc:
+
+== Overview
+
+Confium Patterns provides reusable threshold-crypto deployment
+patterns inspired by Thunderbird's key backup and revocation model.
+Each pattern is a library module, not a standalone service.
+
+Implemented in `confium-patterns`.
+
+== Pattern 1: Threshold key escrow
+
+Generalizes Thunderbird's encrypted key backup:
+
+1. **Escrow**: a client encrypts its private key to a recipient
+   quorum's public key (threshold encapsulation). The encrypted blob
+   (`EscrowBlob`) is stored or transmitted.
+2. **Recovery**: any T-of-N quorum members collaboratively decrypt
+   the blob. No single party sees the plaintext key.
+
+=== API
+
+- `EscrowService::escrow(plaintext_key, recipient_pubkey,
+  escrowed_by, key_id, key_type, encapsulator, aead) -> EscrowBlob`
+- `EscrowService::recover(blob, partial_decryptions, threshold,
+  ciphertext, decapsulator) -> Vec<u8>` (the recovered plaintext key)
+
+=== Types
+
+- `QuorumPublicKey` — the joint public key of the recipient quorum.
+- `EscrowBlob` — the encrypted key + metadata (escrowed_by, key_id,
+  key_type, timestamp, encapsulated_secret, ciphertext).
+- `Encapsulator` trait — KEM encapsulate (e.g., ElGamal-P256).
+- `Aead` trait — symmetric encryption (e.g., AES-256-GCM).
+
+== Pattern 2: Threshold revocation
+
+Generalizes Thunderbird's revocation escrow:
+
+1. **Escrow revocation secret**: a revocation key is threshold-
+   encrypted to a quorum. The quorum can only reveal the revocation
+   if T members agree.
+2. **Reveal**: on revocation trigger (policy decision, time
+   threshold), the quorum decrypts the revocation secret.
+
+This pattern prevents premature revocation (requires quorum) while
+ensuring revocation is always possible (not dependent on a single
+key holder).
+
+== Security notes
+
+- Both patterns use the threshold encryption layer
+  (`confium-tc-elgamal-p256` or `confium-tc-ecies-p256`) for the
+  KEM step.
+- The AEAD step uses `confium-core`'s `Aead` trait (AES-256-GCM
+  by default).
+- Escrow blobs are JSON-serializable for storage and transmission.
+- The escrow service does NOT log plaintext keys; audit entries
+  record only the key_id and timestamp.
+
+== See also
+
+- Spec 54 — ElGamal-P256 threshold encryption (the KEM used by
+  escrow).
+- Spec 22 — threshold session (the signing session that authorizes
+  key recovery).
