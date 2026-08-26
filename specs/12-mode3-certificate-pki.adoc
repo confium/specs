@@ -60,7 +60,7 @@ Mode 3 deployments are described by a TOML manifest encoding:
 * Transparency log policy
 * Archival / re-quorum cadence
 
-See link:40-deployment-manifest.adoc[40 — Deployment manifest] for the
+See the link:https://github.com/confium/confium/tree/main/crates/confium-deployment[confium-deployment crate] for the
 schema.
 
 == Implementation source
