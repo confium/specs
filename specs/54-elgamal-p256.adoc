@@ -46,4 +46,3 @@ The encryptor and decryptor derive the same shared secret because
 == Implementation source
 
 * Crate: `confium-tc-elgamal-p256`
-* Engineering doc: `TODO.roadmap/31-threshold-encryption.md`

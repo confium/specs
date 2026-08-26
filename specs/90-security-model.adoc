@@ -42,7 +42,6 @@ Ribose Inc. <open.source@ribose.com>
 
 == Cross-references
 
-* Engineering doc: `TODO.roadmap/08-security-model.md`
 * Threat model: link:91-threat-model.adoc[91 — Threat model]
 * FIPS strategy: link:92-fips-140.adoc[92 — FIPS 140-3]
 * Privacy: link:93-privacy.adoc[93 — Privacy]

@@ -13,8 +13,8 @@ trusted.
 
 It is the reference implementation submitted to NIST MPTS
 (Multi-Party Threshold Cryptography) standardization, and anchors the
-OIML CNML (Certificat Numérique de Métrologie Légale) flagship
-deployment under the OIML SMART program operated by Ribose.
+CNML (Certificat Numérique de Métrologie Légale) flagship
+deployment under the SMART metrology program operated by Ribose.
 
 == Three deployment modes
 
@@ -51,7 +51,7 @@ Organizations with their own certificate/document formats and workflow
 semantics. Custom delegation rules, custom verification pipelines,
 custom archival rules. CNML is the flagship.
 
-*Examples*: OIML CNML, BIPM calibration, pharmaceutical regulator drug
+*Examples*: CNML, calibration authorities, pharmaceutical regulator drug
 approvals, academic accreditation, supply chain provenance, treaty
 documents.
 
@@ -87,8 +87,6 @@ organization] for the full layout.
 
 * Source: https://github.com/confium/confium
 * RustDoc: https://docs.rs/confium (and per-crate)
-* Engineering roadmap: https://github.com/confium/confium/tree/main/TODO.roadmap
-* Cross-reference: `TODO.roadmap/26-confium-framework.md`
 
 == Status
 
@@ -96,6 +94,6 @@ Confium 0.3 is structurally complete with 744+ tests passing. The
 framework ships real cryptographic primitives (P-256 Shamir + ECDSA,
 threshold ElGamal, threshold ECIES with ECDH + AES-256-GCM, real CMS
 DER encoding, real Canonical XML, real RFC 6962 Merkle inclusion proofs)
-plus interfaces for all planned algorithms.
+plus interfaces for all specified algorithms.
 
-Pre-1.0 work continues per `TODO.roadmap/68-roadmap-timeline.md`.
+Pre-1.0 work continues toward stabilization.

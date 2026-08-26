@@ -64,4 +64,3 @@ All arithmetic in P-256 scalar field (modular, prime order ~2^256).
 
 * Crate: `confium-tc-frost-p256`
 * Example: `confium-examples/src/bin/p256_threshold_signing.rs`
-* Engineering doc: `TODO.roadmap/04-threshold-cryptography.md`

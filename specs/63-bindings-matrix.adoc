@@ -15,7 +15,7 @@ Confium has bindings in 5 languages (Rust, Python, Ruby, WASM/TypeScript, Go, pl
 == Scope
 
 * Feature-by-feature per-language matrix
-* Status: ✅ shipped / 🚧 in progress / ❌ not planned
+* Status: ✅ shipped / 🚧 in progress / ❌ out of scope
 * Last-updated timestamp per row
 
 == Out of scope
@@ -66,11 +66,11 @@ Confium has bindings in 5 languages (Rust, Python, Ruby, WASM/TypeScript, Go, pl
 == Maintenance
 
 * Update on every binding release.
-* Auto-generate from per-language `parity.yaml` files (TODO).
+* Auto-generate from per-language `parity.yaml` files (pending).
 * Status icons:
 ** ✅ = shipped and tested
 ** 🚧 = implementation in progress
-** ❌ = not planned (will not ship in current scope)
+** ❌ = out of scope (will not ship in current scope)
 
 == Security considerations
 

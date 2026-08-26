@@ -177,4 +177,3 @@ shims (separate cdylib/jar for separate host apps).
 
 * link:00-framework-overview.adoc[00 — Framework overview]
 * Implementation: `confium/Cargo.toml`
-* Engineering: `TODO.roadmap/26-confium-framework.md`

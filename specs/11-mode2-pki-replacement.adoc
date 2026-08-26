@@ -61,4 +61,3 @@ no HSM replacement.
 
 * Crates: `confium-pkcs11-server`, `confium-openssl-provider`, `confium-tls-signer`, `confium-jce-provider`
 * Example: `confium-examples/src/bin/pkcs11_server_demo.rs`
-* Engineering doc: `TODO.roadmap/28-mode2-pki-replacement.md`
