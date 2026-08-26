@@ -69,5 +69,4 @@ A malicious CA cannot silently issue a fraudulent cert because:
 == Implementation source
 
 * Crate: `confium-transparency` (merkle submodule)
-* Engineering doc: `TODO.roadmap/36-transparency-and-ots.md`
 * Test vectors: `crates/confium-transparency/tests/integration.rs`

@@ -9,7 +9,7 @@
   <text x="70" y="108" font-size="16" font-weight="bold" fill="#d97706">Mode 3 — TC Certificate PKI</text>
   <text x="70" y="128" font-size="11" fill="#666">Institutional deployments with custom certificate formats and workflows</text>
   <g font-size="11" fill="#333">
-    <text x="70" y="156">• OIML CNML (flagship)</text>
+    <text x="70" y="156">• CNML (flagship)</text>
     <text x="70" y="174">• BIPM calibration</text>
     <text x="70" y="192">• Pharmaceutical regulators</text>
     <text x="70" y="210">• Academic accreditation</text>

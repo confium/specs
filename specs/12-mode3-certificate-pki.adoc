@@ -14,10 +14,10 @@ custom archival rules.
 
 image::../images/cnml-tier-hierarchy.svg[CNML 5-tier hierarchy]
 
-The OIML CNML project is the Mode 3 flagship. It demonstrates Confium
+The CNML project is the Mode 3 flagship. It demonstrates Confium
 at the highest-stakes end:
 
-* International treaty organization (OIML, 60+ member states)
+* International treaty organization (60+ member states)
 * Nation-state adversary (both cyber and political)
 * Decades-long archival
 * Sovereignty sensitivity (no single nation trusted)
@@ -67,4 +67,3 @@ schema.
 
 * Crates: `confium-pki`, `confium-deployment`, `confium-transparency`, `confium-attributes`, `confium-patterns`
 * Example: `confium-examples/src/bin/mini_cnml_demo.rs`
-* Engineering docs: `TODO.roadmap/27-cnml-deployment.md`, `TODO.roadmap/33-config-manifest.md`

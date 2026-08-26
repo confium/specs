@@ -11,7 +11,7 @@ Confium PKI provides X.509 certificate parsing, CMS SignedData
 envelope construction and verification, scoped delegation templates,
 and XMLDSig canonicalization. The crate is designed for Mode 2
 (PKI replacement via threshold keys) and Mode 3 (custom certificate
-workflows like OIML CNML).
+workflows like CNML).
 
 Implemented in `confium-pki`. Feature-gated:
 `parsing` (default), `delegation` (default), `cms`, `xmldsig`.
@@ -69,7 +69,7 @@ envelopes compatible with OpenSSL, Thunderbird, and Adobe.
 Feature: `delegation`.
 
 The `delegation` module provides typed templates for "parent cert
-delegates bounded authority to child cert." Used by OIML CNML
+delegates bounded authority to child cert." Used by CNML
 (Manufacturer Model Cert → Instance Cert delegation chains).
 
 - `DelegationScope` — what operations a child cert is authorized

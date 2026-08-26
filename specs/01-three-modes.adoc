@@ -127,7 +127,7 @@ CIOs, regulator CTOs, accreditation body directors.
 
 === Examples
 
-* OIML CNML (flagship) — type approval certificates with model-bound
+* CNML (flagship) — type approval certificates with model-bound
   delegation, 5-tier hierarchy
 * BIPM calibration — SI-traceable calibration certificates
 * Pharmaceutical regulator — drug applications, GMP certs
@@ -176,4 +176,3 @@ use any mode or combination.
 * link:10-mode1-peer-tc.adoc[10 — Mode 1 detail]
 * link:11-mode2-pki-replacement.adoc[11 — Mode 2 detail]
 * link:12-mode3-certificate-pki.adoc[12 — Mode 3 detail]
-* Implementation: `TODO.roadmap/26-confium-framework.md`

@@ -65,4 +65,3 @@ Peers authenticate each other via:
 
 * Crate: `confium-tc` and per-algorithm crates
 * Example: `confium-examples/src/bin/p256_threshold_signing.rs`
-* Engineering doc: `TODO.roadmap/04-threshold-cryptography.md`

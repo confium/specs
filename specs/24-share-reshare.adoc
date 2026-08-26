@@ -58,5 +58,4 @@ threshold crypto.
 == Implementation source
 
 * Crate: `confium-tc` (reshare submodule)
-* Engineering doc: `TODO.roadmap/30-tc-reshare-protocol.md`
 * Algorithm: Lagrange interpolation over P-256 scalar field

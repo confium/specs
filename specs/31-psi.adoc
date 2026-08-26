@@ -21,7 +21,7 @@ PSI lets two parties compute the intersection of their private sets without reve
 
 == Out of scope
 
-* Malicious-secure PSI (out of scope for v0.3; planned for v0.4)
+* Malicious-secure PSI (out of scope for v0.3; deferred to v0.4)
 
 == Specification
 

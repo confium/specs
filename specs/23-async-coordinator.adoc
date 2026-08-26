@@ -60,5 +60,4 @@ Everything else runs async via the coordinator.
 == Implementation source
 
 * Crate: `confium-tc` (coordinator submodule)
-* Engineering doc: `TODO.roadmap/29-tc-coordinator-design.md`
 * FFI: `cfmc_session_create`, `cfmc_session_submit_commitment`, `cfmc_session_submit_share`, `cfmc_session_aggregate`

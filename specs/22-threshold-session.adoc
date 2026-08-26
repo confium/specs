@@ -68,7 +68,6 @@ This proof is sufficient for administrative proceedings.
 
 == Cross-references
 
-* Engineering doc: `TODO.roadmap/04-threshold-cryptography.md`
 * Coordinator spec: link:23-async-coordinator.adoc[23 — Async coordinator]
 * Re-sharing spec: link:24-share-reshare.adoc[24 — Share re-sharing]
 * Implementation: `confium-tc/src/session.rs`
