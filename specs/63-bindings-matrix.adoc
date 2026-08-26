@@ -6,7 +6,7 @@
 
 == Status
 
-**Draft.** Authoritative live version: link:++https://www.confium.org/bindings/parity/++[`/bindings/parity/` on the website].
+**Draft.** Authoritative live version: https://github.com/confium/confium/blob/main/docs/bindings/parity.mdx[the parity matrix in the confium repo].
 
 == Motivation
 
@@ -78,5 +78,5 @@ N/A — this is a documentation spec.
 
 == References
 
-* Live matrix: link:++https://www.confium.org/bindings/parity/++[]
+* Live matrix: https://github.com/confium/confium/blob/main/docs/bindings/parity.mdx[parity matrix]
 * Confium source: `crates/confium-python`, `crates/confium-wasm`, `crates/confium-go`, sibling repo `confium-ruby`
