@@ -10,7 +10,10 @@
 #  1. AsciiDoc syntax: every source must render clean under
 #     Asciidoctor at WARN strictness (the site converter is
 #     deliberately lenient; this is the strict reader's opinion).
-#  2. Converter contract: the site's unit tests + golden-corpus
+#  2. Internal link integrity: every relative link:/image:: target
+#     in README and the corpus must exist — renumberings caught at
+#     the source, not as dead ends for readers.
+#  3. Converter contract: the site's unit tests + golden-corpus
 #     test run against THIS PR's corpus (placed where the site's
 #     fetch pipeline expects it, so fetch-sources reuses it).
 
@@ -48,6 +51,21 @@ jobs:
 
       - name: Render every source (fail on warnings)
         run: asciidoctor --failure-level WARN -q -D /tmp/rendered specs/*.adoc README.adoc report.adoc
+
+      - name: Internal link integrity (relative targets must exist)
+        run: |
+          dead=0
+          for f in README.adoc specs/*.adoc; do
+            dir=$(dirname "$f")
+            for target in $(grep -oE 'link:[^[]+' "$f" | sed 's/^link://;s/^++//;s/++$//'); do
+              case "$target" in http*|mailto:*) continue;; esac
+              [ -f "$dir/$target" ] || { echo "DEAD link in $f: $target"; dead=1; }
+            done
+            for target in $(grep -oE '^image::[^[]+' "$f" | sed 's/^image:://'); do
+              [ -f "$dir/$target" ] || { echo "DEAD image in $f: $target"; dead=1; }
+            done
+          done
+          exit $dead
 
   converter-contract:
     runs-on: ubuntu-latest
