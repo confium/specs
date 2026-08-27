@@ -1,0 +1,83 @@
+# Contract checks for the central-site rendering pipeline.
+#
+# The site (confium/confium.github.io) renders every spec here
+# through its AsciiDoc converter, under quality gates (neutrality,
+# forbidden language, spec completeness). Those checks used to run
+# only in the site repo — one repository and one deploy cycle away
+# from the edit that broke them. This workflow enforces the same
+# contract here, on every PR, using the site's own modules:
+#
+#  1. AsciiDoc syntax: every source must render clean under
+#     Asciidoctor at WARN strictness (the site converter is
+#     deliberately lenient; this is the strict reader's opinion).
+#  2. Converter contract: the site's unit tests + golden-corpus
+#     test run against THIS PR's corpus (placed where the site's
+#     fetch pipeline expects it, so fetch-sources reuses it).
+
+name: contract
+
+on:
+  pull_request:
+    paths:
+      - "specs/**"
+      - "images/**"
+      - ".github/workflows/contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "specs/**"
+      - "images/**"
+      - ".github/workflows/contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  asciidoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Install Asciidoctor
+        run: gem install asciidoctor --no-document
+
+      - name: Render every source (fail on warnings)
+        run: asciidoctor --failure-level WARN -q -D /tmp/rendered specs/*.adoc README.adoc report.adoc
+
+  converter-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: specs
+
+      - uses: actions/checkout@v4
+        with:
+          repository: confium/confium.github.io
+          path: site
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install site dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Place this corpus where the fetch pipeline expects it
+        run: |
+          mkdir -p site/vendor
+          cp -r specs site/vendor/specs
+
+      - name: Convert and run the contract tests
+        working-directory: site
+        run: |
+          node scripts/fetch-sources.mjs specs
+          npx vitest run scripts
