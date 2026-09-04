@@ -1,0 +1,74 @@
+= Specification 93 — Threat model
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:status: framework
+:toc:
+
+== Purpose
+
+A systematic statement of what Confium defends, against whom, and
+where the residual risk sits. Spec 90 gives the trust roots and
+defense-in-depth table; this spec enumerates the concrete threats
+behind them, so reviews and audits have a checklist instead of prose.
+
+== Assets
+
+|===
+|Asset |Loss impact
+|Long-term threshold shares |Group identity forgeable until re-keying
+|Group public keys / certificates |Silent substitution of the signer set
+|Session nonces |Partial-signature forgery under nonce reuse
+|Transparency log head |Undetectable split-view of issued artifacts
+|Coordinator WAL |Lost liveness; replayed rounds
+|Deployment manifests |Actor roles and quorum definitions subverted
+|Audit trail |Non-repudiation lost
+|===
+
+== Trust boundaries
+
+1. *Party ↔ coordinator* — messages cross a network; every session
+   message is signed by the sender's identity key (spec 22).
+2. *Coordinator ↔ persistence* — the write-ahead log and keystore sit
+   behind `confium-store` compartment boundaries (spec 50).
+3. *Host ↔ plugin* — plugins execute in WASM or out-of-process
+   sandboxes; the engine treats them as untrusted code.
+4. *Service ↔ verifier* — third parties verify via composite
+   signatures, transparency proofs, and evidence records with no
+   trust in Confium infrastructure.
+5. *Operator ↔ supply chain* — publisher root keys gate the plugin
+   registry; installs verify before loading.
+
+== Threat catalogue
+
+|===
+|ID |Threat |Boundary |Primary defense |Secondary
+|T1 |Rogue-key registration in ad-hoc quorums |Party↔coordinator |Manifest-declared actor sets; key registration outside ceremonies is refused |Re-keying ceremony
+|T2 |Nonce reuse across sessions |Party |Fresh OS randomness per round; nonce never persisted |Identifiable abort (spec 22)
+|T3 |Coordinator Byzantine behavior (dropped/biased rounds) |Party↔coordinator |Round-framed messages, per-party transcript hash |Audit trail, BIML-tier review
+|T4 |Share theft from storage |Coordinator↔persistence |Compartmentalized backends, HSM/TPM/OpenPGP-card hold |Zeroized memory
+|T5 |Transport MITM/rewrite |All network |Per-message signatures; TLS for raw transports |Noise transport (spec 23)
+|T6 |Plugin supply-chain implant |Operator↔plugin |Signed publisher roots, sandbox isolation |Registry revocation
+|T7 |Transparency log split-view |Service↔verifier |Gossip + consistency proofs (specs 42/43) |External monitors
+|T8 |Long-term archival forgery |Service↔verifier |ERS evidence records re-anchored over time (spec 45) |Multiple anchors
+|T9 |Coerced silent issuance |Quorum |T-of-N policy; transparency log makes omission visible |Ceremony review
+|T10 |Side-channel extraction |Host |Constant-time comparisons on tags/roots; zeroize-on-drop |HSM offload
+|T11 |WAL tampering for replay |Coordinator↔persistence |Hash-chained WAL entries |Audit trail
+|T12 |Malicious plugin inside sandbox |Host↔plugin |Capability-restricted FFI; no ambient authority |Process kill limits
+|===
+
+== Residual risks (accepted)
+
+* A collusion of T or more parties can always sign — the threshold IS
+  the control; transparency and audit bound the blast radius.
+* Nation-state adversary with HSM firmware compromise defeats the
+  hardware layer; detection relies on ceremony and log monitors.
+* Post-quantum: discrete-log schemes remain until composite migration
+  completes (spec 82); hybrid verification is the bridge.
+
+== Cross-references
+
+* Security model: link:90-security-model.adoc[90 — Security model]
+* Session lifecycle + identifiable abort: link:22-threshold-session.adoc[22 — Threshold session]
+* Coordinator: link:23-async-coordinator.adoc[23 — Async coordinator]
+* Storage compartments: link:50-store-backends.adoc[50 — Store backends]
+* Composite migration: link:82-composite-signatures.adoc[82 — Composite signatures]

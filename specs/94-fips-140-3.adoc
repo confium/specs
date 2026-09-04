@@ -1,0 +1,61 @@
+= Specification 94 — FIPS 140-3 positioning
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:status: framework
+:product: pki
+:toc:
+
+== Purpose
+
+How Confium relates to FIPS 140-3 — what is claimed, what is not, and
+the migration path for consumers that must operate inside validated
+environments.
+
+== Claims policy
+
+*Confium is not a FIPS-validated cryptographic module and does not
+claim to be.* Validation is a property of a specific module boundary
+submitted to the CMVP program, not of a library. Consumers needing
+validation wrap Confium's coordination layer around a validated
+module boundary via the store and HSM backends.
+
+== Algorithm inventory
+
+|===
+|Primitive |Used by |FIPS status
+|ECDSA P-256 / ECDH |FROST-P256, ElGamal, ECIES, PKI |Approved (SP 800-186)
+|SHA-256 / SHA-3 |Hashing, KDFs, challenges |Approved
+|HMAC |Envelope integrity |Approved (SP 800-224)
+|AES-256-GCM |ECIES AEAD |Approved
+|Ed25519 |FROST-Ed25519, composite |Not in the current approved set; composite-bridged
+|ML-DSA-65 (FIPS 204) |`confium-tc-frost-ml-dsa-65` |Approved algorithm, validation pending deployment
+|ML-KEM (FIPS 203) |`confium-tc-ml-kem` |Approved algorithm, validation pending deployment
+|===
+
+== Migration architecture
+
+Consumers in validated environments operate two lanes:
+
+1. *Approved lane* — P-256/AES/SHA operations inside a validated
+   module boundary; Confium coordinates thresholds around it via
+   PKCS#11 (spec 83) and the HSM store backends.
+2. *Hybrid lane* — composite signatures (spec 82) pair a
+   classical-approved component with a PQ component, so verification
+   succeeds in both validated and forward-looking deployments during
+   the transition.
+
+== Deployment guidance
+
+* Declare algorithm policy in the deployment manifest; the policy
+  engine refuses quorums whose schemes fall outside it.
+* Keep root ceremonies on the approved lane; use hybrid composites
+  at issuance boundaries where external verifiers are heterogeneous.
+* Track SP 800-224 and the PQC validation program for migration
+  checkpoints — do not hard-code revision numbers in policy files.
+
+== Cross-references
+
+* Composite signatures: link:82-composite-signatures.adoc[82 — Composite signatures]
+* PKCS#11 dispatch: link:83-pkcs11-server.adoc[83 — PKCS#11 server]
+* Security model: link:90-security-model.adoc[90 — Security model]
+* Threat model: link:93-threat-model.adoc[93 — Threat model]

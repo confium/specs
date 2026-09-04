@@ -34,6 +34,7 @@ Threshold-backed certificate authority, OCSP/CRL, ACME, composite signatures.
 * link:80-cnml-deployment.adoc[CNML Deployment] — institutional CNML flagship Mode 3 deployment
 * link:81-threshold-ca.adoc[Threshold CA Lifecycle] *(draft)* — issue, revoke, CRL from threshold keys
 * link:82-composite-signatures.adoc[Composite Signatures] *(draft)* — PQ migration via multi-alg composites
+* link:94-fips-140-3.adoc[FIPS 140-3 Positioning] — claims policy, algorithm inventory, migration lanes
 * link:83-pkcs11-server.adoc[PKCS#11 Server] *(draft)* — drop-in HSM replacement via PKCS#11 v3.0
 
 == Keyless
