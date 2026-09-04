@@ -24,7 +24,7 @@ site renders every spec at https://www.confium.org/specs/.
 
 == Specification documents
 
-37 numbered specifications plus the product index, one file per spec under `specs/`.
+40 numbered specifications plus the product index, one file per spec under `specs/`.
 Grouped by product (the primary framing; the Mode 1/2/3 deployment-mode
 terminology is retained as historical context inside the specs).
 
@@ -72,6 +72,7 @@ terminology is retained as historical context inside the specs).
 * link:specs/81-threshold-ca.adoc[Threshold CA Lifecycle]
 * link:specs/82-composite-signatures.adoc[Composite Signatures (PQ Migration)]
 * link:specs/83-pkcs11-server.adoc[PKCS#11 Server]
+* link:specs/94-fips-140-3.adoc[Specification 94 — FIPS 140-3 positioning]
 
 === Keyless
 
@@ -85,6 +86,7 @@ terminology is retained as historical context inside the specs).
 * link:specs/32-mpc-spdz.adoc[MPC (SPDZ)]
 * link:specs/33-differential-privacy.adoc[Differential Privacy]
 * link:specs/34-ring-sigs.adoc[Ring Signatures]
+* link:specs/95-privacy.adoc[Specification 95 — Privacy-preserving operation]
 
 === Verify
 
@@ -95,6 +97,7 @@ terminology is retained as historical context inside the specs).
 === Security and compliance
 
 * link:specs/90-security-model.adoc[Specification 90 — Security model]
+* link:specs/93-threat-model.adoc[Specification 93 — Threat model]
 == Diagrams
 
 Architectural diagrams live in `images/` and are referenced by the

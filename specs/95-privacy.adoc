@@ -1,0 +1,62 @@
+= Specification 95 — Privacy-preserving operation
+Ribose Inc. <open.source@ribose.com>
+:sectnums:
+:status: framework
+:product: privacy
+:toc:
+
+== Purpose
+
+The privacy surface of Confium: the primitives that let parties
+compute over sensitive inputs without disclosing them, and the
+operating principles that keep deployments privacy-preserving
+end-to-end.
+
+== Principles
+
+1. *Data minimization* — protocols disclose function outputs, never
+   inputs. A ceremony transcript must not leak participant data.
+2. *Unlinkability where identity is not required* — ring signatures
+   and blind variants separate authorization from identification.
+3. *Verifiable privacy* — outputs carry proofs (membership, range,
+   possession) so verifiers do not have to trust the claim of privacy.
+4. *Quantified disclosure* — where perfect privacy is impossible
+   (statistics over datasets), differential privacy bounds the leak.
+
+== Primitive map
+
+|===
+|Capability |Spec |Crate
+|Private set intersection |link:31-psi.adoc[31 — PSI] |`confium-privacy`
+|MPC (SPDZ-style arithmetic) |link:32-mpc-spdz.adoc[32 — MPC/SPDZ] |`confium-privacy`
+|Differentially private statistics |link:33-differential-privacy.adoc[33 — Differential privacy] |`confium-privacy`
+|Anonymous authorization |link:34-ring-sigs.adoc[34 — Ring signatures] |`confium-privacy`, `confium-ring`
+|Zero-knowledge predicates |link:41-attributes-dsl.adoc[41 — Attributes DSL] |`confium-attributes`, `confium-crypto-zk`
+|===
+
+== Composition with threshold operations
+
+Privacy primitives compose with the threshold layer in two modes:
+
+* *Threshold-guarded privacy* — the privacy computation itself is
+  thresholdized (no single party sees the dataset), used for PSI and
+  secure aggregation.
+* *Privacy-guarded authorization* — a threshold quorum authorizes,
+  and a privacy primitive (ring signature, blind signature) prevents
+  the authorization from identifying the initiator.
+
+== Operational cautions
+
+* Differential privacy budgets are deployment-wide state — record
+  spend in the audit trail, refuse queries past budget.
+* PSI cardinality leaks are acceptable only when the intersection
+  itself is the agreed output; semi-honest settings must be stated in
+  the deployment manifest.
+* Ring-signature anonymity sets must be provisioned large enough and
+  refreshed; a set of one is de-anonymization by configuration.
+
+== Cross-references
+
+* Attribute predicates: link:41-attributes-dsl.adoc[41 — Attributes DSL]
+* Transparency (privacy of issuance vs verifiability trade-offs): link:42-transparency-log.adoc[42 — Transparency log]
+* Security model: link:90-security-model.adoc[90 — Security model]

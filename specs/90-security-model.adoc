@@ -42,6 +42,6 @@ Ribose Inc. <open.source@ribose.com>
 
 == Cross-references
 
-* Threat model: 91 — Threat model (not yet written)
-* FIPS strategy: 92 — FIPS 140-3 (not yet written)
-* Privacy: 93 — Privacy (not yet written)
+* Threat model: link:93-threat-model.adoc[93 — Threat model]
+* FIPS strategy: link:94-fips-140-3.adoc[94 — FIPS 140-3 positioning]
+* Privacy: link:95-privacy.adoc[95 — Privacy-preserving operation]
