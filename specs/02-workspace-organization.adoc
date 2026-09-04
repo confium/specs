@@ -6,119 +6,184 @@ Ribose Inc. <open.source@ribose.com>
 
 == Overview
 
-The `confium/` Rust workspace contains 43 crates organized by concern.
+The `confium/` Rust workspace contains 67 crates organized by concern.
 This document describes the layout and the rationale for each crate
 boundary.
 
 == Crate categories
 
+The workspace holds 67 crates. The lists below are kept in
+lockstep with the workspace — the contract CI fails if a crate exists
+in the workspace but not here, or vice versa. The Ruby binding lives in
+the sibling repository `confium-ruby`.
+
 === Core / engine (5 crates)
 
 |===
-|Crate |Purpose |Status
-|`confium-core` |Engine: plugin loader, registry, FFI entry points |Shipped (10 interfaces)
-|`confium-api` |Public Rust API + plugin SDK |Skeleton
-|`confium-macros` |Proc-macros for plugin authors |Skeleton
-|`confium-cli` |`confium` end-user command |Sub-command stubs wired
-|`confium-mock-plugin` |Reference mock plugin for testing |Skeleton
+|Crate |Purpose
+|`confium-core` |Engine: plugin loader, registry, and FFI entry points for the Confium framework
+|`confium-api` |Public Rust API and plugin SDK for the Confium threshold cryptography framework
+|`confium-macros` |Proc-macros
+|`confium-cli` |Command-line interface for the Confium threshold cryptography framework
+|`confium-mock-plugin` |Reference mock plugin for testing Confium plugin loading
 |===
 
-=== Threshold cryptography infrastructure (1 consolidated crate)
+=== Threshold session layer (4 crates)
 
 |===
-|Crate |Submodules |Status
-|`confium-tc` |`session`, `coordinator`, `reshare`, `kem` |Real (74 tests)
+|Crate |Purpose
+|`confium-tc-core` |Core threshold cryptography session primitives
+|`confium-tc` |Threshold cryptography primitives: session, coordinator, reshare, KEM, TCP server
+|`confium-coordinator` |Distributed threshold signing coordinator: session orchestration, rate limiting, policy, metrics
+|`confium-tc-keys` |Key lifecycle, HSM protection, production hardening for threshold keys
 |===
 
-=== Threshold signing algorithms (6 crates)
+=== Shared crypto primitives (3 crates)
 
 |===
-|Crate |Algorithm |Status
-|`confium-tc-frost-ed25519` |FROST over Ed25519 |Shipped (real)
-|`confium-tc-frost-p256` |FROST over ECDSA P-256 |Real (25 tests)
-|`confium-tc-cmp20` |CMP20 over ECDSA P-256 |Shipped (real)
-|`confium-tc-gg18` |GG18 over ECDSA P-256 |Shipped (real)
-|`confium-tc-bls` |Threshold BLS |Interface
-|`confium-tc-frost-ml-dsa-65` |Threshold ML-DSA-65 |Research
+|Crate |Purpose
+|`confium-crypto-vss` |Verifiable secret sharing, Paillier, Schnorr proofs, and NIZK primitives
+|`confium-crypto-zk` |Zero-knowledge proof systems: set membership, signature possession, accumulators
+|`confium-privacy` |Privacy-preserving crypto: MPC, PSI, PIR, differential privacy, ring signatures
 |===
 
-=== Threshold encryption algorithms (4 crates)
+=== Threshold signing algorithms (7 crates)
 
 |===
-|Crate |Algorithm |Status
-|`confium-tc-elgamal-p256` |Threshold ElGamal over P-256 |Real (3 tests)
-|`confium-tc-ecies-p256` |Threshold ECIES with ECDH + AES-256-GCM |Real (4 tests)
-|`confium-tc-ml-kem` |Threshold ML-KEM (FIPS 203) |Research
-|`confium-tc-fhe-bfv` |Threshold BFV FHE |Research
+|Crate |Purpose
+|`confium-tc-frost-ed25519` |FROST threshold signature over Ed25519
+|`confium-tc-frost-p256` |FROST threshold signature with real Shamir and ECDSA over P-256
+|`confium-tc-cmp20` |CMP20 threshold ECDSA over P-256
+|`confium-tc-gg18` |GG18 threshold ECDSA
+|`confium-tc-bls` |Threshold BLS signature for cross-organization aggregation
+|`confium-tc-frost-ml-dsa-65` |Threshold FROST over ML-DSA-65 (FIPS 204)
+|`confium-ring` |Threshold ring signatures
 |===
 
-=== PKI (1 consolidated crate)
+=== Threshold encryption (4 crates)
 
 |===
-|Crate |Submodules |Status
-|`confium-pki` |`cert`, `csr`, `path`, `result`, `delegation`, `cms`, `xmldsig` |Real (43 tests, feature-flagged)
+|Crate |Purpose
+|`confium-tc-elgamal-p256` |Threshold ElGamal encryption over P-256
+|`confium-tc-ecies-p256` |Threshold ECIES with ECDH and AES-256-GCM over P-256
+|`confium-tc-ml-kem` |Threshold ML-KEM (FIPS 203)
+|`confium-tc-fhe-bfv` |Threshold BFV fully homomorphic encryption
+|===
+
+=== PKI and certificates (4 crates)
+
+|===
+|Crate |Purpose
+|`confium-pki` |X.509 cert, scoped delegation, CMS, and XMLDSig
+|`confium-pki-tc` |Threshold PKI integration: CT log, OCSP, ACME, attribute-based encryption
+|`confium-composite` |Composite multi-algorithm signature aggregation for PQ migration
+|`confium-attributes` |Attribute-based threshold party selection with predicate DSL
+|===
+
+=== Transparency and archival (3 crates)
+
+|===
+|Crate |Purpose
+|`confium-transparency` |Append-only Merkle tree transparency log with OTS anchoring and ERS archival
+|`confium-log-server` |Public transparency log server
+|`confium-log-monitor` |Third-party monitor
 |===
 
 === Storage backends (5 crates)
 
 |===
-|Crate |Standard |Status
-|`confium-store` |Store trait + in-memory backend |Shipped
-|`confium-store-pkcs11` |PKCS#11 v3.0 |Skeleton
-|`confium-store-tpm` |TPM 2.0 |Skeleton
-|`confium-store-cloud` |AWS/GCP/Azure KMS REST |Skeleton
-|`confium-store-openpgp-card` |OpenPGP card |Interface
+|Crate |Purpose
+|`confium-store` |Compartmentalized key and secret persistence
+|`confium-store-pkcs11` |PKCS#11 v3.0 wrapping backend
+|`confium-store-tpm` |TPM 2.0 sealed storage backend
+|`confium-store-cloud` |AWS, GCP, and Azure cloud KMS storage backend
+|`confium-store-openpgp-card` |OpenPGP card backend (YubiKey, Nitrokey)
 |===
 
 === Network transports (4 crates)
 
 |===
-|Crate |Transport |Status
-|`confium-net` |Transport trait |Shipped
-|`confium-net-tcp` |TCP |Shipped
-|`confium-net-quic` |QUIC |Shipped
-|`confium-net-ws` |WebSocket |Shipped
+|Crate |Purpose
+|`confium-net` |Network transport abstraction
+|`confium-net-tcp` |TCP transport
+|`confium-net-quic` |QUIC transport
+|`confium-net-ws` |WebSocket transport
 |===
 
-=== Mode 2 shims (4 crates)
-
-|===
-|Crate |Host |Status
-|`confium-pkcs11-server` |PKCS#11 v3.0 host apps |Dispatch layer
-|`confium-openssl-provider` |OpenSSL 3.0 host apps |Interface
-|`confium-tls-signer` |TLS 1.3 host apps |Interface
-|`confium-jce-provider` |Java host apps |Interface
-|===
-
-=== Mode 3 infrastructure (5 crates)
-
-|===
-|Crate |Purpose |Status
-|`confium-deployment` |Deployment manifest + actor identity (consolidated) |Real (14 tests)
-|`confium-transparency` |Merkle tree + OTS + ERS (consolidated) |Real (19 tests)
-|`confium-attributes` |Attribute-based threshold predicates |Real (9 tests)
-|`confium-composite` |Multi-alg composite signatures (PQ migration) |Real (7 tests with Ed25519 verifier)
-|`confium-patterns` |Escrow + revocation service (consolidated) |Real (7 tests)
-|===
-
-=== Sandbox (2 crates)
-
-|===
-|Crate |Runtime |Status
-|`confium-sandbox-wasm` |WASM (browser director signing) |Shipped
-|`confium-sandbox-process` |Out-of-process |Shipped
-|===
-
-=== Other (7 crates)
+=== PKI-replacement shims (4 crates)
 
 |===
 |Crate |Purpose
-|`confium-daemon` |JSON-RPC daemon
-|`confium-examples` |Runnable demo binaries
-|`confium-registry` |Static-site plugin catalog client
-|`confium-publish` |Plugin author tool
-|`confium-test-harness` |NIST MPTS evaluation bench
-|`confium-ring` |Threshold ring signatures (research)
+|`confium-pkcs11-server` |PKCS#11 v3.0 server dispatching to Confium threshold protocol
+|`confium-openssl-provider` |OpenSSL 3.0 provider using Confium for threshold signing
+|`confium-tls-signer` |TLS 1.3 signature callback satisfying via Confium threshold
+|`confium-jce-provider` |Java Cryptography Extension provider
+|===
+
+=== Deployment and patterns (2 crates)
+
+|===
+|Crate |Purpose
+|`confium-deployment` |Deployment manifest schema and actor identity management
+|`confium-patterns` |Threshold crypto deployment patterns: key escrow and revocation service
+|===
+
+=== Product surfaces (4 crates)
+
+|===
+|Crate |Purpose
+|`confium-threshold` |Confium Threshold product facade
+|`confium-keyless` |Confium Keyless product facade
+|`confium-verify` |Confium Verify product facade
+|`confium-signatif` |SIGNATIF framework implementation layer
+|===
+
+=== Services (5 crates)
+
+|===
+|Crate |Purpose
+|`confium-daemon` |JSON-RPC daemon for the Confium threshold cryptography framework
+|`confium-signerd` |Distributed threshold signing daemon
+|`confium-operator` |Kubernetes operator
+|`confium-oidc` |OIDC token verifier
+|`confium-verify-server` |HTTP service for verifying threshold signatures and transparency proofs
+|===
+
+=== Observability (1 crates)
+
+|===
+|Crate |Purpose
+|`confium-observability` |Enterprise observability: structured logging, trace correlation, metrics, syslog
+|===
+
+=== Sandboxes (2 crates)
+
+|===
+|Crate |Purpose
+|`confium-sandbox-wasm` |WASM sandbox for browser-based Confium director signing
+|`confium-sandbox-process` |Out-of-process sandbox for isolating Confium plugin execution
+|===
+
+=== Language bindings (3 crates)
+
+|===
+|Crate |Purpose
+|`confium-python` |Python bindings for the Confium threshold cryptography framework
+|`confium-node` |Node.js bindings for the Confium threshold cryptography framework
+|`confium-wasm` |Browser/Node.js verifier package
+|===
+
+=== Tools and testing (7 crates)
+
+|===
+|Crate |Purpose
+|`confium-publish` |Author tool for publishing Confium plugins to the registry
+|`confium-registry` |Client for the Confium static-site plugin catalog
+|`confium-test-harness` |NIST MPTS evaluation harness
+|`confium-examples` |Runnable example binaries demonstrating Confium threshold cryptography
+|`confium-benchmarks` |criterion benches for the confium hot paths
+|`confium-fuzz` |Fuzzing targets for confium security-critical surfaces
+|`confium-it` |Cross-crate integration tests
 |===
 
 == Workspace Cargo.toml structure
@@ -126,7 +191,7 @@ boundary.
 [source,toml]
 ----
 [workspace.package]
-version = "0.3.0"
+version = "0.5.9"
 edition = "2024"
 rust-version = "1.85"
 authors = ["Ribose Open <open.source@ribose.com>"]
@@ -137,7 +202,7 @@ categories = ["authentication", "cryptography"]
 
 [workspace.dependencies]
 # Internal crates
-confium-pki = { path = "crates/confium-pki", version = "0.3.0" }
+confium-pki = { path = "crates/confium-pki", version = "0.5.9" }
 # ... etc
 
 # Shared external deps
