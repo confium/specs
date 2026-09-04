@@ -37,6 +37,24 @@ permissions:
   contents: read
 
 jobs:
+  workspace-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: confium/confium
+          path: confium
+          sparse-checkout: crates
+      - name: Spec 02 crate list must match the workspace
+        run: |
+          spec=$(grep -oE '`confium-[a-z0-9-]+`' specs/02-workspace-organization.adoc | tr -d '\`' | grep -v 'confium-ruby' | sort -u)
+          real=$(find confium/crates -maxdepth 2 -name Cargo.toml | xargs grep -h '^name = "confium-' | sed 's/name = "//;s/"//' | sort -u)
+          diff <(echo "$spec") <(echo "$real") || {
+            echo "ERROR: spec 02 crate list diverged from the workspace (see diff above)."
+            exit 1
+          }
+
   asciidoc:
     runs-on: ubuntu-latest
     steps:
