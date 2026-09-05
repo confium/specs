@@ -192,7 +192,7 @@ the sibling repository `confium-ruby`.
 [source,toml]
 ----
 [workspace.package]
-version = "0.5.9"
+version = "0.7.0"
 edition = "2024"
 rust-version = "1.85"
 authors = ["Ribose Open <open.source@ribose.com>"]
@@ -203,7 +203,7 @@ categories = ["authentication", "cryptography"]
 
 [workspace.dependencies]
 # Internal crates
-confium-pki = { path = "crates/confium-pki", version = "0.5.9" }
+confium-pki = { path = "crates/confium-pki", version = "0.7.0" }
 # ... etc
 
 # Shared external deps
