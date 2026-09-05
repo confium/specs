@@ -100,12 +100,13 @@ the sibling repository `confium-ruby`.
 |`confium-store-openpgp-card` |OpenPGP card backend (YubiKey, Nitrokey)
 |===
 
-=== Network transports (4 crates)
+=== Network transports (5 crates)
 
 |===
 |Crate |Purpose
 |`confium-net` |Network transport abstraction
 |`confium-net-tcp` |TCP transport
+|`confium-net-noise` |Noise_XX encrypted transport
 |`confium-net-quic` |QUIC transport
 |`confium-net-ws` |WebSocket transport
 |===

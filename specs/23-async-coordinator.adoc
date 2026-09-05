@@ -61,3 +61,23 @@ Everything else runs async via the coordinator.
 
 * Crate: `confium-tc` (coordinator submodule)
 * FFI: `cfmc_session_create`, `cfmc_session_submit_commitment`, `cfmc_session_submit_share`, `cfmc_session_aggregate`
+
+== Transport security
+
+Coordinator sessions run over registry transports addressed by URL:
+
+* `tcp://host:port` — plain TCP with length-prefix framing. Local
+  development and trusted networks; every session message is still
+  individually signed by the sender's identity key (spec 22).
+* `noise://host:port` — Noise_XX (`Noise_XX_25519_ChaChaPoly_BLAKE2s`)
+  over TCP: mutual static-key exchange during the handshake, then
+  encrypted and authenticated frames. URL parameters:
+  ** `key=<hex>` — provision a stable local static key (32-byte
+     private key, hex). Without it an ephemeral key is generated
+     (trust-on-first-use).
+  ** `pinned=<hex>` — SHA-256 fingerprint of the expected remote
+     static key; the handshake aborts on mismatch.
+
+The signer daemon selects the transport via `coordinator_url`; the
+coordinator serves any scheme linked into the binary via
+`CoordinatorServer::start_url`.
